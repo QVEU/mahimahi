@@ -1,8 +1,11 @@
 ################################################################################
-### Load Libraries ###
+### Install and Load Libraries ###
 ################################################################################
+remotes::install_version("SeuratObject", "4.1.4", repos = c("https://satijalab.r-universe.dev", getOption("repos")))
+remotes::install_version("Seurat", "4.4.0", repos = c("https://satijalab.r-universe.dev", getOption("repos")))
 
 library(Seurat)
+library(SeuratObject)
 library(tidyverse)
 
 ################################################################################
