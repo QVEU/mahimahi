@@ -270,9 +270,11 @@ DimPlot(WTs, reduction = 'umap')
 Idents(merged_seurat_0.5) <- merged_seurat_0.5$RNA_snn_res.0.5
 table(merged_seurat_0.5$orig.ident, merged_seurat_0.5$RNA_snn_res.0.5)
 #####################################
-### Continue with analyses.
+### Save the object and metadata.
 ####################################
 DimPlot(merged_seurat_0.5, reduction = 'umap', split.by = 'orig.ident')
+
+saveRDS(object = merged_seurat_0.5, file = "/data/lvd_qve/Projects/PTD_StrandSpecificCounting_scRNAseq/CellRanger/mutsFinal.rds")
 
 scissors.all_meta <- merged_seurat_0.5@meta.data
 write.csv(scissors.all_meta, file = "/data/lvd_qve/Projects/PTD_StrandSpecificCounting_scRNAseq/CellRanger/scissors.metadata0.5.csv")
@@ -282,7 +284,9 @@ joined_seurat.markers %>%
 group_by(cluster)
 write.csv(joined_seurat.markers, file = "/data/lvd_qve/Projects/PTD_StrandSpecificCounting_scRNAseq/CellRanger/markers.0.5.csv")
 
-
+#####################################
+### Make a volcano plot per cluster.
+####################################
 library(ggrepel)
 joined_seurat.markers$delabel <- NA
 joined_seurat.markers$diffexpressed <- "NO"
@@ -318,6 +322,4 @@ p1 <- ggplot(joined_seurat.markers, aes(avg_log2FC, -log(p_val_adj,10), shape = 
           facet_wrap(~factor(cluster)) + labs(title = "Differential Expression across Clusters") +NoLegend()
         
 p1 + geom_label_repel(size = 2, aes(label = delabel), max.overlaps = 1000)
-        
-        
-        
+    
