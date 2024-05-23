@@ -1,3 +1,4 @@
+
 ################################################################################
 ### Load Libraries ###
 ################################################################################
@@ -13,7 +14,7 @@ library(tidyverse)
 ### Define File Paths ###
 ################################################################################
 
-### Create Seurat Object
+### Create Seurat Object. Reads from these samples were mapped to file path /data/lvd_qve/QVEU_Code/sequencing/template_fastas/refdata-gex-GRCh38-2020-A_PV_GFP_mRuby/GRCh38-2020-A_PV_GTF_mRuby/
 
 dataset_loc <- "~/lab_share/Projects/PTD_StrandSpecificCounting_scRNAseq/CellRanger/"
 ids <- c("RFP_C109S_PV", "WT_GFP_PV", "WT_GFP_RFP_Y88P_PV", "WT_GFP_RFP_D177A_PV", "RFP_Y88P_PV", "RFP_D177A_PV", "WT_GFP_RFP_C109S_PV", "WT_IRES_GFP_PV","Del_IRES_mRuby3_PV","WT_IRES_GFP_Del_IRES_mRuby3_PV","WT_IRES_mRuby3_MutPol_PV","Del_IRES_mRuby3_MutPol_PV","WT_IRES_mRuby3_MutPol_WT_IRES_GFP_PV", "Mock_5h_PV")
