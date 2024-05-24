@@ -1,6 +1,5 @@
 ---
 author: Christine Mariskanish
-title: CVB3_TT
 output:
   html_document:
     toc: true
@@ -31,7 +30,7 @@ library(clustree)
 
 ## QC CVB3_TT with Seurat {.tabset .tabset-fade .tabset-pills}
 ```{r}
-CVB3_TT.matrix <- Read10X(data.dir = "/Volumes/lvd_qve/Projects/PTD_StrandSpecificCounting_scRNAseq/CellRanger/CVB3_TT/outs/filtered_feature_bc_matrix/")
+CVB3_TT.matrix <- Read10X(data.dir = "/Volumes/LVD_QVE/Projects/PTD_StrandSpecificCounting_scRNAseq/CellRanger/CVB3_TT/outs/filtered_feature_bc_matrix/")
 CVB3_TT <- CreateSeuratObject(counts = CVB3_TT.matrix, project = "CVB3_TT", min.cells = 3, min.features = 10)
 CVB3_TT
 ```
@@ -164,7 +163,6 @@ CVB3_TT <- RunPCA(CVB3_TT, features = c(s.genes, g2m.genes))
 PCAPlot(CVB3_TT)
 Idents(CVB3_TT) <- CVB3_TT$orig.ident
 head(Idents(CVB3_TT))
-PCAPlot(CVB3_TT)
 ```
 
 ```{r}
@@ -229,7 +227,7 @@ DoHeatmap(CVB3_res, features = top10$gene) + NoLegend()
 ```
 
 ```{r}
-saveRDS(CVB3_res, file="/Volumes/lvd_qve/Projects/CM_kb/CVB3_TT.rds")
+saveRDS(CVB3_res, file="/Volumes/lvd_qve/Projects/CM_kb/CVB3TT.rds")
 ```
 
 ```{r}
