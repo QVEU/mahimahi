@@ -266,7 +266,7 @@ Idents(object = merged_seurat_0.5, merged_seurat_0.5.cells[10583:12093]) <- 'Bat
 WTs <- subset(merged_seurat_0.5, idents  = c('Batch2 WT GFP', 'Batch1 WT GFP'))
 DimPlot(WTs, reduction = 'umap')
 #####################################
-### No significant batch effect found. Reset the Idents in the Suerat object.
+### No significant batch effect found. Reset the Idents in the Seurat object.
 ####################################
 Idents(merged_seurat_0.5) <- merged_seurat_0.5$RNA_snn_res.0.5
 table(merged_seurat_0.5$orig.ident, merged_seurat_0.5$RNA_snn_res.0.5)
