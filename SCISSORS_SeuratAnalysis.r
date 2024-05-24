@@ -11,7 +11,7 @@ library(clustree)
 library(tidyverse)
 
 ################################################################################
-### Define File Paths ###
+### Define file paths and load in CellRanger data ###
 ################################################################################
 
 ### Create Seurat Object. Reads from these samples were mapped to file path /data/lvd_qve/QVEU_Code/sequencing/template_fastas/refdata-gex-GRCh38-2020-A_PV_GFP_mRuby/GRCh38-2020-A_PV_GTF_mRuby/
