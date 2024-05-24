@@ -162,6 +162,9 @@ RidgePlot(CVB3_TT, features = c("PCNA", "TOP2A", "MCM6", "MKI67"), ncol = 2)
 # phase
 CVB3_TT <- RunPCA(CVB3_TT, features = c(s.genes, g2m.genes))
 PCAPlot(CVB3_TT)
+Idents(CVB3_TT) <- CVB3_TT$orig.ident
+head(Idents(CVB3_TT))
+PCAPlot(CVB3_TT)
 ```
 
 ```{r}
