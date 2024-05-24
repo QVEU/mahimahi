@@ -50,7 +50,7 @@ merged_seurat_object[["percent.ribo"]] <- PercentageFeatureSet(merged_seurat_obj
 
 # split the dataset into a list
 seurat_object_merged <- SplitObject(merged_seurat_object, split.by = "orig.ident")
-#Remove the ridiculously huge chunk of code and instead make a for loop that find the infected threshold for virus_percentage and labels them according to low, high or not infected.
+
 for (i in ids){
   if (i == "Mock_5h_PV"){
     seurat_object_merged[[i]]$InfectedStatus <- "Not_Infected"
