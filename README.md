@@ -5,4 +5,4 @@ The SCISSORS pipeline was developed by the Quantitative Virology and Evolution U
 
 Shell scripts in this repository are compatible with the Skyline high performance compute cluster, which uses the job scheduler, Slurm.
 
-Respective output files are in the ai-fas5.niaid.nih.gov server under lvd_qveu/Lab_Alumni_Archives/Projects_CAM/Scissors
+Output files are in the ai-fas5.niaid.nih.gov server under lvd_qveu/Lab_Alumni_Archives/Projects_CAM/Scissors and the CM_kb project folder in Skyline.
