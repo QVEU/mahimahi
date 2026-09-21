@@ -43,9 +43,32 @@ TRUTH = {
     ("CELL_CCCCCCCCCCCCC", "mRuby3"):      {"Pos": 8,  "Neg": 2},
 }
 
+# A population of cells with a known per-template (-)/(+) rate, so the
+# regression slope recovered by analysis/replication.R can be checked against
+# the value the reads were built from. Kept deliberately noise-free: the point
+# is to verify the plumbing from FASTQ through to a fitted slope, not to
+# characterise the estimator (tests/test_replication_fit.R does that with
+# noise).
+POPULATION_RATES = {"eGFP": 0.05, "mRuby3": 0.20}
+POPULATION_CELLS = 24
+
+for _n in range(POPULATION_CELLS):
+    _cell = f"CELL_POP{_n:03d}"
+    for _template, _rate in POPULATION_RATES.items():
+        _pos = 60 + 20 * _n              # 60..520, gives the fit real leverage
+        _neg = int(round(_rate * _pos))
+        TRUTH[(_cell, _template)] = {"Pos": _pos, "Neg": _neg}
+    TRUTH[(_cell, "HostControl")] = {"Pos": 40, "Neg": 0}
+
 # Reads per distinct UMI. >1 exercises deduplication: the pipeline must count
 # distinct UMIs, not reads.
 READS_PER_UMI = 3
+
+
+def _cbc_for(cell):
+    """Stable 16 nt barcode per cell name, padded with a non-informative base."""
+    stem = cell.replace("CELL_", "").replace("POP", "P")
+    return stem[:BARCODE_LEN].ljust(BARCODE_LEN, "A")
 
 
 def random_seq(n):
@@ -73,7 +96,7 @@ def main():
     records = []   # (read_id, cbc, umi, seq)
     counter = 0
     for (cell, template), strands in TRUTH.items():
-        cbc = cell.replace("CELL_", "")[:BARCODE_LEN].ljust(BARCODE_LEN, "A")
+        cbc = _cbc_for(cell)
         for strand, n_umis in strands.items():
             for u in range(n_umis):
                 umi = f"{template[:2].upper()}{strand[0]}{u:04d}".ljust(UMI_LEN, "T")[:UMI_LEN]
@@ -109,7 +132,7 @@ def main():
         for name, seq in refs.items():
             fh.write(f"@SQ\tSN:{name}\tLN:{len(seq)}\n")
         for (cell, template), strands in TRUTH.items():
-            cbc = cell.replace("CELL_", "")[:BARCODE_LEN].ljust(BARCODE_LEN, "A")
+            cbc = _cbc_for(cell)
             for strand, n_umis in strands.items():
                 for u in range(n_umis):
                     umi = f"{template[:2].upper()}{strand[0]}{u:04d}".ljust(UMI_LEN, "T")[:UMI_LEN]
@@ -127,7 +150,7 @@ def main():
     # --- ground truth ---------------------------------------------------
     expected = []
     for (cell, template), strands in TRUTH.items():
-        cbc = cell.replace("CELL_", "")[:BARCODE_LEN].ljust(BARCODE_LEN, "A")
+        cbc = _cbc_for(cell)
         pos, neg = strands.get("Pos", 0), strands.get("Neg", 0)
         expected.append({
             "CBC": cbc, "ref_name": template, "Pos": pos, "Neg": neg,
@@ -137,14 +160,18 @@ def main():
     with open(os.path.join(FIXTURES, "expected.json"), "w") as fh:
         json.dump({"reads_per_umi": READS_PER_UMI,
                    "barcode_length": BARCODE_LEN, "umi_length": UMI_LEN,
+                   "population_rates": POPULATION_RATES,
+                   "population_cells": POPULATION_CELLS,
                    "expected": expected}, fh, indent=2)
 
     print(f"fixtures in {FIXTURES}")
     print(f"  templates: {TEMPLATES}")
     print(f"  {len(records):,} reads, {len(records)//READS_PER_UMI:,} distinct UMIs")
     print(f"  {len(expected)} (cell, template) combinations")
-    print("\n  ground truth:")
-    for e in expected:
+    print(f"  population: {POPULATION_CELLS} cells at "
+          + ", ".join(f"{k} (-)/(+)={v}" for k, v in POPULATION_RATES.items()))
+    print("\n  ground truth (first 8 rows):")
+    for e in expected[:8]:
         ri = "n/a" if e["Rep_Index"] is None else f"{e['Rep_Index']:.4f}"
         print(f"    {e['CBC'][:10]:10s} {e['ref_name']:12s} "
               f"Pos={e['Pos']:3d} Neg={e['Neg']:2d}  Rep_Index={ri}")

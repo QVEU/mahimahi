@@ -219,6 +219,60 @@ per-strand UMI counts, over all three input routes:
 `bash tests/workflow/run_workflow_tests.sh`.
 
 
+## Added: replication analysis (`analysis/replication.R`, `analysis/scissors_replication.R`)
+
+Replaces `Scissors_Analysis_v4.ipynb`. Computation is separated from plotting
+so it can be tested (`tests/test_replication_fit.R`, 19 assertions).
+
+**`fitSet()` could not run.** It had a bare `break` between its two `Fits`
+assignments. In R, `break` outside a loop is an error -- "no loop for
+break/next, jumping to top level" -- confirmed against R 4.3.3. The call
+therefore never reached the block that built the `Ratio`/`Error` frame, so
+every figure depending on those columns (cells 9, 16, 19, 20, 21, 24) was
+drawing on a call that could not complete.
+
+**Coefficients extracted by name.** `summary(glm(...))$coefficients[2]` and
+`[4]` depend on column-major flattening of a 2x4 matrix. Fit without an
+intercept and the matrix becomes 1x4, at which point `[2]` is the standard
+error, not the slope. The test suite demonstrates both cases.
+
+**Confidence intervals rather than a bare standard error.** The original
+plotted `Ratio ± Error` with `Error` the slope's standard error, i.e. a ~68%
+interval presented as though it were 95%.
+
+**`slope` and `Rep_Index` are distinguished.** `Ratio` is the `Neg ~ Pos`
+slope, which is (-)/(+); `Rep_Index` is (-)/total. The notebook's axes read
+"((-)strand/total(vRNA))" over plots of the slope. They converge only as the
+ratio approaches zero -- at r = 0.2 they differ by 17%.
+
+**Unfittable groups are reported, not fatal**, through a `status` column.
+One sample with three cells no longer takes down the run.
+
+**Factor levels derived from the data.** Cell 9 declared four levels, one of
+which matched nothing the notebook loaded; `factor()` maps a non-match to
+`NA`, so that sample's point vanished from the figure instead of erroring.
+
+**`Neg`/`Pos` retained.** `CollectFiles()` dropped them, which is why cell 26
+(`aes(CBC_readcount, Neg/Pos)`) could not run.
+
+**Seurat joins are instrumented.** `join_seurat_metadata()` reports matches in
+both directions and can fail above a loss threshold. The workflow's barcodes
+are as-sequenced while Cell Ranger's are whitelist-corrected, so some loss is
+expected -- the notebook's inner join gave no indication of how much.
+
+**Reading gzipped input no longer requires R.utils.** `data.table::fread()`
+below ~1.15 refuses `.gz` without it; `read_counts_table()` streams through
+gzip instead, with a base-R fallback.
+
+**Does not require the lab share.** The script takes its input paths as
+arguments, so it no longer sources `analysis/config.R`, which stops when the
+share is not mounted.
+
+Verified end to end: synthetic reads built at a known (-)/(+) rate, through the
+workflow, through the analysis script, recovering the generating rate with the
+true value inside the 95% CI for all three input routes.
+
+
 ## Added
 
 - `config.sh` / `analysis/config.R` — paths, sample lists, QC thresholds.
@@ -228,3 +282,5 @@ per-strand UMI counts, over all three input routes:
   dropped-cell doublet scenario.
 - `.gitignore`.
 - `workflow/` + `config/` -- the Snakemake strand-counting workflow above.
+- `analysis/replication.R` + `analysis/scissors_replication.R`.
+- `docs/MIGRATION.md` -- every original script mapped to its replacement.

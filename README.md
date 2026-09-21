@@ -12,8 +12,9 @@ custom reference.
 This repository is a restructured version of `QVEU/SCISSORS`. The analysis is
 unchanged in intent; the reorganization fixes a set of bugs and removes
 hardcoded paths and indices. See [NEWS.md](NEWS.md) for the full list of
-changes and [Known open questions](#known-open-questions) for the two things
-that need a decision from someone who ran the original experiments.
+changes, [docs/MIGRATION.md](docs/MIGRATION.md) for where each original script
+went, and [Known open questions](#known-open-questions) for the things that
+need a decision from someone who ran the original experiments.
 
 Shell scripts target the Skyline HPC cluster and its Slurm scheduler.
 
@@ -63,6 +64,9 @@ Shell scripts target the Skyline HPC cluster and its Slurm scheduler.
 | `analysis/CVB3_QC.Rmd` | Coxsackievirus B3 per-sample QC and clustering. |
 | `analysis/EVA71_QC.Rmd` | Enterovirus A71 per-sample QC and clustering. |
 | `analysis/PV_mutants_integrated.R` | Integrated poliovirus mutant analysis. |
+| `analysis/replication.R` | Replication-rate estimation; no plotting deps, unit-tested. |
+| `analysis/scissors_replication.R` | Replication figures from the workflow output. |
+| `docs/MIGRATION.md` | Every original script mapped to its replacement, and why. |
 | `workflow/Snakefile` | Strand-specific counting workflow (FASTQ or SAM/BAM in). |
 | `workflow/scripts/` | `embed_barcodes`, `extract_reads`, `tabulate_strands`, `strand_qc`, `merge_*`. |
 | `workflow/envs/scissors.yaml` | Conda environment for the workflow. |
@@ -307,6 +311,80 @@ fixtures deliberately give one cell two templates with different replication
 levels (eGFP 0.0909, mRuby3 0.3333), which is the case the original collapsed;
 the suite asserts they come out distinct. It also confirms that an inverted
 strand convention is rejected, and that a second run is a no-op.
+
+
+## Replication analysis
+
+`analysis/scissors_replication.R` consumes the workflow's output and produces
+the replication figures. It replaces `Scissors_Analysis_v4.ipynb`.
+
+```bash
+Rscript analysis/scissors_replication.R                    # reads results/scissors_counts.tsv.gz
+Rscript analysis/scissors_replication.R \
+    --counts=results/scissors_counts.tsv.gz \
+    --figures=results/figures \
+    --min-umis=100 \
+    --metadata=/path/to/seurat_metadata.csv                # optional UMAP overlay
+```
+
+Computation lives in `analysis/replication.R` with no plotting dependencies,
+so it is unit-tested (`tests/test_replication_fit.R`).
+
+### Two quantities, not one
+
+The notebook used one axis label for both of these. They answer different
+questions:
+
+- **`slope`** — from `fit_replication_slope()`. The slope of `Neg ~ Pos` across
+  cells, per sample × template. This is **(−)/(+)**. Population-level, and
+  robust to per-cell depth, which is why the original used it.
+- **`Rep_Index`** — from `summarise_rep_index()`. Per cell, per template,
+  `Neg/(Pos+Neg)`. This is **(−)/total**, which is what the notebook's axes
+  said while plotting the slope.
+
+Since (−)/total = r/(1+r), they converge only as r → 0: at r = 0.05 they differ
+by 5%, at r = 0.20 by 17%. Both are produced, each labelled for what it is.
+
+### What `fit_replication_slope()` fixes in `fitSet()`
+
+- **It returns.** `fitSet()` had a bare `break` between its two `Fits`
+  assignments. `break` outside a loop is an error in R (`no loop for
+  break/next, jumping to top level`), so the call failed before reaching the
+  block that built the `Ratio`/`Error` frame. Every figure downstream of it was
+  drawing on a call that could not complete.
+- **Coefficients by name**, not `summary(glm(...))$coefficients[2]` and `[4]`.
+  Those indices rely on column-major flattening of a 2×4 matrix; drop the
+  intercept or lose a group's variance and the matrix changes shape, and `[2]`
+  silently returns something else. The test suite demonstrates this.
+- **A 95% confidence interval**, not `Ratio ± Error` where `Error` was the
+  slope's standard error — a ~68% interval drawn as though it were 95%.
+- **Unfittable groups are reported, not fatal**, via a `status` column
+  (`insufficient_cells`, `no_variance_in_Pos`, `no_negative_strand`).
+- **Factor levels come from the data.** Cell 9 hardcoded four levels, one of
+  which (`WT_IRES_GFP_S1_CBC.csv`) matched nothing the notebook loaded;
+  `factor()` maps a non-match to `NA`, so that sample's point silently vanished
+  from the figure rather than erroring.
+- **`Neg`/`Pos` are kept.** `CollectFiles()` dropped them
+  (`IF[,-c("Neg","Pos")]`), so cell 26's `aes(CBC_readcount, Neg/Pos)` could
+  not run.
+
+### Joining to Seurat metadata
+
+`join_seurat_metadata()` reports how many cells matched in each direction and
+can fail above a loss threshold. This matters because the workflow's barcodes
+are as-sequenced while Cell Ranger's are error-corrected against the 10x
+whitelist, so a cell whose barcode carried a sequencing error is corrected on
+one side only and silently fails to join. The notebook's inner join on a bare
+barcode string gave no indication of how much it dropped.
+
+```
+join: 2/4 strand-count cells matched Seurat metadata (50.0% unmatched);
+      1 of 3 Seurat cells had no strand counts
+```
+
+Setting the `whitelist` column in `config/samples.tsv` to Cell Ranger's
+barcode list (or a DRAGEN `barcodeSummary.tsv`) restricts counting to called
+cells up front, which is the cleaner fix.
 
 
 ## Doublet scores: read this before reusing old TSVs
