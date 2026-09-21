@@ -1,0 +1,54 @@
+# Slurm job logs (the directory itself is tracked so a fresh clone can run)
+logs/*
+!logs/.gitkeep
+*_out
+*.err
+*.log
+slurm-*.out
+
+# Cell Ranger outputs -- large, and live on the share, not in git
+*/outs/
+_cmdline
+_filelog
+_finalstate
+_invocation
+_jobmode
+_log
+_mrosource
+_perf*
+_sitecheck
+_tags
+_timestamp
+_uuid
+_vdrkill
+_versions
+
+# Analysis outputs
+*.rds
+*.RDS
+*.h5
+*.mtx
+*.mtx.gz
+
+# Knitted notebooks
+*.html
+*_files/
+*_cache/
+
+# R session state
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS cruft
+.DS_Store
+Thumbs.db

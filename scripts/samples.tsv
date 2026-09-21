@@ -1,0 +1,37 @@
+# SCISSORS sample table, consumed by scripts/02_count.sh
+#
+# Columns (tab-separated):
+#   output_id     Cell Ranger --id and output directory name. This is the name
+#                 the R analysis expects; the `ids` vector in
+#                 analysis/PV_mutants_integrated.R must match these exactly.
+#   fastq_sample  Cell Ranger --sample, i.e. the sample prefix in the FASTQ
+#                 filenames, which is the Sample_ID column of SampleSheet.csv.
+#   fastq_dir     The fastq_path directory produced by stage 1.
+#
+# Rows with fastq_dir set to TODO are skipped with an error by 02_count.sh.
+# Only the Mock_5h row could be recovered from the pre-restructure script; the
+# rest need filling in from your mkfastq output directories. See README
+# "Known open questions".
+#
+# fastq_sample values are inferred by dropping the _PV suffix, which is the
+# relationship the recovered Mock_5h row shows (id Mock_5h_PV, sample Mock_5h).
+# 02_count.sh verifies FASTQs actually exist for the prefix before counting,
+# so a wrong guess fails immediately rather than producing an empty matrix.
+#
+#output_id	fastq_sample	fastq_dir
+Mock_5h_PV	Mock_5h	/data/lvd_qve/Projects/PTD_StrandSpecificCounting_scRNAseq/81123_SCISSORS_FreshAnalysis/PV_Rep/CellRanger_Analysis/AAC2L5HM5_12/outs/fastq_path
+RFP_C109S_PV	RFP_C109S	TODO
+WT_GFP_PV	WT_GFP	TODO
+WT_GFP_RFP_Y88P_PV	WT_GFP_RFP_Y88P	TODO
+WT_GFP_RFP_D177A_PV	WT_GFP_RFP_D177A	TODO
+RFP_Y88P_PV	RFP_Y88P	TODO
+RFP_D177A_PV	RFP_D177A	TODO
+WT_GFP_RFP_C109S_PV	WT_GFP_RFP_C109S	TODO
+WT_IRES_GFP_PV	WT_IRES_GFP	TODO
+Del_IRES_mRuby3_PV	Del_IRES_mRuby3	TODO
+WT_IRES_GFP_Del_IRES_mRuby3_PV	WT_IRES_GFP_Del_IRES_mRuby3	TODO
+WT_IRES_mRuby3_MutPol_PV	WT_IRES_mRuby3_MutPol	TODO
+Del_IRES_mRuby3_MutPol_PV	Del_IRES_mRuby3_MutPol	TODO
+WT_IRES_mRuby3_MutPol_WT_IRES_GFP_PV	WT_IRES_mRuby3_MutPol_WT_IRES_GFP	TODO
+CVB3_TT	CVB3_TT	TODO
+EVA71_TT	EVA71_TT	TODO

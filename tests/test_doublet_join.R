@@ -1,0 +1,88 @@
+source("analysis/helpers.R")
+
+mock_object <- function(cells) {
+  m <- matrix(0, nrow = 1, ncol = length(cells),
+              dimnames = list("GENE1", cells))
+  attr(m, "meta") <- list()
+  m
+}
+md <- function(obj, field) attr(obj, "meta")[[field]]
+tmp <- tempfile(fileext = ".tsv")
+
+barcodes <- sprintf("CELL%03d-1", 1:100)
+scores   <- round(seq(0.01, 0.99, length.out = 100), 4)
+predicted <- ifelse(scores > 0.5, "True", "False")
+
+## --------------------------------------------------------------------------
+cat("=== 1. Barcoded file, object has ALL cells ===\n")
+write.table(data.frame(barcode = barcodes, doublet_score = scores,
+                       predicted_doublet = predicted),
+            tmp, sep = "\t", quote = FALSE, row.names = FALSE)
+obj <- suppressMessages(read_doublet_scores(mock_object(barcodes), tmp, "test"))
+stopifnot(identical(md(obj, "doublet_scores"), scores))
+cat("PASS: all 100 scores attached in order\n\n")
+
+## --------------------------------------------------------------------------
+cat("=== 2. THE BUG: min.features dropped cell 1, scores must NOT shift ===\n")
+## Seurat dropped the first barcode. Positional assignment would give every
+## remaining cell the score belonging to the NEXT one.
+dropped_cells <- barcodes[-1]
+obj <- suppressMessages(read_doublet_scores(mock_object(dropped_cells), tmp, "test"))
+got <- md(obj, "doublet_scores")
+expected <- scores[-1]
+shifted  <- scores[-length(scores)]   # what the old positional code produced
+cat("cell CELL002 -> score", got[1], " (correct:", expected[1],
+    "| old positional code would give:", shifted[1], ")\n")
+stopifnot(identical(got, expected), !identical(got, shifted))
+cat("PASS: barcode join is immune to the dropped cell\n\n")
+
+## --------------------------------------------------------------------------
+cat("=== 3. Cells dropped from the middle and reordered ===\n")
+set.seed(7)
+subset_cells <- sample(barcodes[c(-5, -20, -60, -99)])
+obj <- suppressMessages(read_doublet_scores(mock_object(subset_cells), tmp, "test"))
+want <- scores[match(subset_cells, barcodes)]
+stopifnot(identical(md(obj, "doublet_scores"), want))
+cat("PASS:", length(subset_cells), "shuffled cells all got their own score\n\n")
+
+## --------------------------------------------------------------------------
+cat("=== 4. Merged-object cell names (-<sample> suffix) ===\n")
+merged_names <- sub("-1$", "-Mock_5h_PV", barcodes)
+obj <- suppressMessages(read_doublet_scores(mock_object(merged_names), tmp, "test"))
+stopifnot(identical(md(obj, "doublet_scores"), scores))
+cat("PASS: '-Mock_5h_PV' suffix matched against '-1' in the score file\n\n")
+
+## --------------------------------------------------------------------------
+cat("=== 5. Score file from a different run is rejected ===\n")
+err <- tryCatch({ read_doublet_scores(mock_object(c("OTHER-1", "CELL002-1")), tmp, "test"); "NO ERROR" },
+                error = function(e) conditionMessage(e))
+cat("Error:", substr(err, 1, 90), "...\n")
+stopifnot(grepl("no matching barcode", err))
+cat("PASS: mismatched barcodes error instead of silently dropping cells\n\n")
+
+## --------------------------------------------------------------------------
+cat("=== 6. Legacy 2-column file, counts agree -> allowed with a warning ===\n")
+legacy <- tempfile(fileext = ".tsv")
+write.table(data.frame(scores, predicted), legacy, sep = "\t",
+            quote = FALSE, row.names = FALSE, col.names = FALSE)
+w <- NULL
+obj <- withCallingHandlers(
+  suppressMessages(read_doublet_scores(mock_object(barcodes), legacy, "legacy")),
+  warning = function(cond) { w <<- c(w, conditionMessage(cond)); invokeRestart("muffleWarning") })
+stopifnot(identical(md(obj, "doublet_scores"), scores), any(grepl("positional", w)))
+cat("PASS: works, and warns that the join is positional\n\n")
+
+## --------------------------------------------------------------------------
+cat("=== 7. Legacy 2-column file, counts DISAGREE -> hard error ===\n")
+cat("    (this is the silent corruption in the original code)\n")
+err <- tryCatch({ suppressWarnings(read_doublet_scores(mock_object(barcodes[-1]), legacy, "legacy")); "NO ERROR" },
+                error = function(e) conditionMessage(e))
+cat("Error:", substr(err, 1, 95), "...\n")
+stopifnot(grepl("100 rows but the object has 99 cells", err))
+cat("PASS: length mismatch is fatal, not silent\n\n")
+
+cat("=== 8. Missing file ===\n")
+err <- tryCatch({ read_doublet_scores(mock_object(barcodes), "/nonexistent.tsv", "x"); "NO ERROR" },
+                error = function(e) conditionMessage(e))
+stopifnot(grepl("not found", err))
+cat("PASS: clear error naming the scrublet step\n")
