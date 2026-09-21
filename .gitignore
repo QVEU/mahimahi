@@ -52,3 +52,10 @@ venv/
 # OS cruft
 .DS_Store
 Thumbs.db
+
+# Snakemake
+.snakemake/
+results/
+tests/workflow/results*/
+tests/workflow/fixtures/
+tests/workflow/config_inverted.yaml

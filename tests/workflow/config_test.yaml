@@ -1,0 +1,22 @@
+samples: "tests/workflow/samples_test.tsv"
+results_dir: "tests/workflow/results"
+template: "tests/workflow/fixtures/template.fa"
+barcode:
+  source: "read_name"
+  name_format: "dragen"
+  name_field: 7
+  barcode_length: 16
+  umi_length: 12
+  cb_tag: "CB"
+  ub_tag: "UB"
+strand:
+  convention: "reverse_is_positive"
+  sense_control: "HostControl"
+  sense_control_min_frac: 0.90
+filters:
+  min_mapq: 55
+  min_cell_umis: 0
+align:
+  preset: "sr"
+  extra: ""
+  threads: 4

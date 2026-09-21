@@ -6,6 +6,7 @@
 ##
 ## The pre-restructure scripts referred to the same share four different ways:
 ##   /Volumes/lvd_qve   (10x)   macOS SMB mount
+##   /hpcdata/lvd_qve   (many)  the mahimahi notebooks' spelling of the share
 ##   /Volumes/LVD_QVE   (2x)    same mount, different case -- broke on any
 ##                              case-sensitive volume
 ##   /data/lvd_qve      (4x)    Skyline cluster
@@ -25,6 +26,7 @@ resolve_share_root <- function() {
 
   candidates <- c(
     "/data/lvd_qve",          # Skyline cluster
+    "/hpcdata/lvd_qve",       # Locus cluster / alternate mount of the same share
     "~/lab_share",            # local mount
     "/Volumes/lvd_qve",       # macOS SMB mount
     "/Volumes/LVD_QVE"        # same mount on a case-insensitive volume

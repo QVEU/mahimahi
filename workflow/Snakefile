@@ -1,0 +1,325 @@
+# SCISSORS: strand-specific single-cell counting
+#
+#   Single Cell Isolated Strand Specific Observation of Replication State
+#   Quantitative Virology and Evolution Unit, NIAID
+#
+# Counts, per cell and per template, how many positive- and negative-strand
+# UMIs are logged against a reference. The reference may be a single viral
+# genome, or a genome plus reporters/barcodes that distinguish co-infecting
+# templates from one another.
+#
+#   snakemake --cores 8                      # run everything
+#   snakemake --cores 8 -n                   # dry run, show the plan
+#   snakemake --cores 8 --dag | dot -Tpdf > dag.pdf
+#
+# Inputs are declared in config/samples.tsv; one row per sample. Each row's
+# input may be a FASTQ (aligned here), or a SAM/BAM/CRAM that is already
+# aligned against the template. Mixed input types in one run are fine.
+
+import os
+import sys
+
+import pandas as pd
+
+
+configfile: "config/config.yaml"
+
+
+# ---------------------------------------------------------------------------
+# Sample sheet
+# ---------------------------------------------------------------------------
+
+FASTQ_SUFFIXES = (".fastq", ".fq", ".fastq.gz", ".fq.gz")
+ALIGNMENT_SUFFIXES = (".sam", ".bam", ".cram")
+
+RESULTS = config.get("results_dir", "results")
+
+# Resolve scripts and envs against the Snakefile's own directory so the
+# workflow can be run from anywhere via `snakemake -s /path/to/Snakefile`.
+SCRIPTS = os.path.join(workflow.basedir, "scripts")
+CONDA_ENV = os.path.join(workflow.basedir, "envs", "scissors.yaml")
+
+
+def _read_samples():
+    path = config["samples"]
+    sheet = pd.read_table(path, comment="#", dtype=str).fillna("")
+    sheet.columns = [c.strip() for c in sheet.columns]
+
+    if "sample" not in sheet.columns or "input" not in sheet.columns:
+        raise WorkflowError(
+            f"{path} needs at least 'sample' and 'input' columns; found "
+            f"{list(sheet.columns)}")
+
+    duplicated = sheet["sample"][sheet["sample"].duplicated()].tolist()
+    if duplicated:
+        raise WorkflowError(f"{path} has duplicate sample names: {duplicated}")
+
+    sheet = sheet.set_index("sample", drop=False)
+
+    for sample, row in sheet.iterrows():
+        target = row["input"]
+        if not target:
+            raise WorkflowError(f"{path}: sample '{sample}' has an empty 'input'.")
+        if not target.endswith(FASTQ_SUFFIXES + ALIGNMENT_SUFFIXES):
+            raise WorkflowError(
+                f"{path}: sample '{sample}' input {target!r} is not a recognised type. "
+                f"Expected one of {FASTQ_SUFFIXES + ALIGNMENT_SUFFIXES}.")
+        if target.endswith(FASTQ_SUFFIXES) and _barcode_source(sample, sheet) == "tags":
+            raise WorkflowError(
+                f"{path}: sample '{sample}' is a FASTQ but barcode_source is 'tags'. "
+                f"Tags only exist in an aligned BAM; use 'read_name' or 'paired_fastq'.")
+        if _barcode_source(sample, sheet) == "paired_fastq" and not row.get("mate_fastq"):
+            raise WorkflowError(
+                f"{path}: sample '{sample}' uses barcode_source 'paired_fastq' but has "
+                f"no 'mate_fastq' column value (the R1 barcode read).")
+    return sheet
+
+
+def _barcode_source(sample, sheet=None):
+    sheet = SAMPLES if sheet is None else sheet
+    value = sheet.loc[sample].get("barcode_source", "")
+    return value or config["barcode"]["source"]
+
+
+SAMPLES = _read_samples()
+SAMPLE_NAMES = list(SAMPLES["sample"])
+
+
+def is_fastq(sample):
+    return SAMPLES.loc[sample, "input"].endswith(FASTQ_SUFFIXES)
+
+
+def sample_field(sample, column, default=""):
+    row = SAMPLES.loc[sample]
+    return row.get(column, "") or default
+
+
+# ---------------------------------------------------------------------------
+# Strand convention
+#
+# Every existing SCISSORS script treated a reverse-mapped read (FLAG 0x10) as
+# positive-sense viral RNA. That is the default here. It is a property of the
+# library chemistry, not of the data, so it is configuration -- and
+# rule strand_qc can check it against a sequence of known orientation.
+# ---------------------------------------------------------------------------
+
+_CONVENTIONS = {"reverse_is_positive": "--reverse-is-positive",
+                "forward_is_positive": "--forward-is-positive"}
+
+_convention = config["strand"]["convention"]
+if _convention not in _CONVENTIONS:
+    raise WorkflowError(
+        f"config strand.convention must be one of {sorted(_CONVENTIONS)}, "
+        f"got {_convention!r}")
+STRAND_FLAG = _CONVENTIONS[_convention]
+
+
+def barcode_args(sample):
+    """extract_reads.py arguments for this sample's barcode layout."""
+    source = _barcode_source(sample)
+    bc = config["barcode"]
+    if source == "tags":
+        return (f"--barcode-source tags --cb-tag {bc['cb_tag']} --ub-tag {bc['ub_tag']}")
+    # paired_fastq has already been rewritten into the read name as a suffix.
+    fmt = "suffix" if source == "paired_fastq" else bc["name_format"]
+    args = [f"--barcode-source read_name --name-format {fmt}",
+            f"--barcode-length {bc['barcode_length']}",
+            f"--umi-length {bc['umi_length']}"]
+    if fmt == "dragen":
+        args.append(f"--name-field {bc['name_field']}")
+    return " ".join(args)
+
+
+# ---------------------------------------------------------------------------
+# Targets
+# ---------------------------------------------------------------------------
+
+rule all:
+    input:
+        f"{RESULTS}/scissors_counts.tsv.gz",
+        f"{RESULTS}/strand_qc_summary.tsv",
+        expand(f"{RESULTS}/{{sample}}/counts_long.tsv.gz", sample=SAMPLE_NAMES),
+
+
+# ---------------------------------------------------------------------------
+# Alignment (FASTQ inputs only)
+# ---------------------------------------------------------------------------
+
+rule embed_barcodes:
+    """Move the CBC+UMI from R1 into the R2 read name so it survives alignment."""
+    input:
+        r1=lambda w: sample_field(w.sample, "mate_fastq"),
+        r2=lambda w: SAMPLES.loc[w.sample, "input"],
+    output:
+        temp(f"{RESULTS}/{{sample}}/barcoded_R2.fastq.gz"),
+    params:
+        script=os.path.join(SCRIPTS, "embed_barcodes.py"),
+        barcode_length=config["barcode"]["barcode_length"],
+        umi_length=config["barcode"]["umi_length"],
+    log:
+        f"{RESULTS}/{{sample}}/logs/embed_barcodes.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "python3 {params.script} "
+        "--r1 {input.r1} --r2 {input.r2} -o {output} "
+        "--barcode-length {params.barcode_length} --umi-length {params.umi_length} "
+        "2> {log}"
+
+
+def alignment_input(wildcards):
+    """The FASTQ handed to minimap2: barcode-embedded, or the raw cDNA read."""
+    if _barcode_source(wildcards.sample) == "paired_fastq":
+        return f"{RESULTS}/{wildcards.sample}/barcoded_R2.fastq.gz"
+    return SAMPLES.loc[wildcards.sample, "input"]
+
+
+rule align:
+    """Align the cDNA read against the template with minimap2 -ax sr."""
+    input:
+        reads=alignment_input,
+        template=config["template"],
+    output:
+        temp(f"{RESULTS}/{{sample}}/aligned.bam"),
+    params:
+        preset=config["align"]["preset"],
+        extra=config["align"].get("extra", ""),
+    threads: config["align"]["threads"]
+    log:
+        f"{RESULTS}/{{sample}}/logs/align.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "(minimap2 -t {threads} -a -x {params.preset} {params.extra} "
+        "{input.template} {input.reads} "
+        "| samtools sort -@ 2 -o {output} -) 2> {log}"
+
+
+rule normalise_alignments:
+    """Sort a user-supplied SAM/BAM/CRAM so downstream rules see one format."""
+    input:
+        lambda w: SAMPLES.loc[w.sample, "input"],
+    output:
+        temp(f"{RESULTS}/{{sample}}/provided.bam"),
+    threads: 2
+    log:
+        f"{RESULTS}/{{sample}}/logs/normalise_alignments.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "samtools sort -@ {threads} -o {output} {input} 2> {log}"
+
+
+def alignments_for(wildcards):
+    """Dispatch on input type: align FASTQ, or pass an alignment through."""
+    if is_fastq(wildcards.sample):
+        return f"{RESULTS}/{wildcards.sample}/aligned.bam"
+    return f"{RESULTS}/{wildcards.sample}/provided.bam"
+
+
+# ---------------------------------------------------------------------------
+# Counting
+# ---------------------------------------------------------------------------
+
+rule extract_reads:
+    """Per-read table: cell barcode, UMI, template, strand."""
+    input:
+        alignments_for,
+    output:
+        reads=f"{RESULTS}/{{sample}}/reads.tsv.gz",
+        stats=f"{RESULTS}/{{sample}}/extract_stats.json",
+    params:
+        script=os.path.join(SCRIPTS, "extract_reads.py"),
+        barcode=lambda w: barcode_args(w.sample),
+        strand=STRAND_FLAG,
+        min_mapq=config["filters"]["min_mapq"],
+    log:
+        f"{RESULTS}/{{sample}}/logs/extract_reads.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "python3 {params.script} {input} "
+        "-o {output.reads} --stats {output.stats} "
+        "{params.barcode} {params.strand} --min-mapq {params.min_mapq} "
+        "2> {log}"
+
+
+rule tabulate_strands:
+    """Distinct UMIs per cell, per template, per strand."""
+    input:
+        reads=f"{RESULTS}/{{sample}}/reads.tsv.gz",
+    output:
+        long=f"{RESULTS}/{{sample}}/counts_long.tsv.gz",
+        wide=f"{RESULTS}/{{sample}}/counts_wide.tsv.gz",
+    params:
+        script=os.path.join(SCRIPTS, "tabulate_strands.py"),
+        datalabel=lambda w: (f"--datalabel {sample_field(w.sample, 'datalabel')}"
+                             if sample_field(w.sample, "datalabel") else ""),
+        whitelist=lambda w: (f"--whitelist {sample_field(w.sample, 'whitelist')}"
+                             if sample_field(w.sample, "whitelist") else ""),
+        min_cell_umis=config["filters"]["min_cell_umis"],
+    log:
+        f"{RESULTS}/{{sample}}/logs/tabulate_strands.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "python3 {params.script} {input.reads} "
+        "--sample {wildcards.sample} "
+        "--long-output {output.long} --wide-output {output.wide} "
+        "--min-cell-umis {params.min_cell_umis} "
+        "{params.datalabel} {params.whitelist} "
+        "2> {log}"
+
+
+rule strand_qc:
+    """Strand balance per template; asserts the convention if a control is set."""
+    input:
+        reads=f"{RESULTS}/{{sample}}/reads.tsv.gz",
+    output:
+        f"{RESULTS}/{{sample}}/strand_qc.tsv",
+    params:
+        script=os.path.join(SCRIPTS, "strand_qc.py"),
+        control=lambda w: (f"--sense-control {config['strand']['sense_control']}"
+                           if config["strand"].get("sense_control") else ""),
+        min_frac=config["strand"]["sense_control_min_frac"],
+    log:
+        f"{RESULTS}/{{sample}}/logs/strand_qc.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "python3 {params.script} {input.reads} "
+        "-o {output} --sample {wildcards.sample} "
+        "{params.control} --sense-control-min-frac {params.min_frac} "
+        "2> {log}"
+
+
+rule merge_counts:
+    """One analysis-ready table across all samples."""
+    input:
+        expand(f"{RESULTS}/{{sample}}/counts_wide.tsv.gz", sample=SAMPLE_NAMES),
+    output:
+        f"{RESULTS}/scissors_counts.tsv.gz",
+    params:
+        script=os.path.join(SCRIPTS, "merge_samples.py"),
+    log:
+        f"{RESULTS}/logs/merge_counts.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "python3 {params.script} {input} -o {output} 2> {log}"
+
+
+rule merge_strand_qc:
+    """One strand-balance report across all samples."""
+    input:
+        expand(f"{RESULTS}/{{sample}}/strand_qc.tsv", sample=SAMPLE_NAMES),
+    output:
+        f"{RESULTS}/strand_qc_summary.tsv",
+    params:
+        script=os.path.join(SCRIPTS, "merge_strand_qc.py"),
+    log:
+        f"{RESULTS}/logs/merge_strand_qc.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "python3 {params.script} {input} -o {output} 2> {log}"
