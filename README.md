@@ -52,7 +52,53 @@ ALL CHECKS PASSED across 3 input types (234 rows).
 # Workflow tests: all passed.
 ```
 
-If either is missing tooling it says `SKIP` and exits 0 rather than failing.
+If either is missing tooling it says `SKIP` and exits 0 rather than failing,
+and reports which interpreter it inspected and what could not be imported.
+
+### Setting up on an HPC cluster
+
+Use **one conda environment**, from the file in this repo:
+
+```bash
+conda env create -f workflow/envs/scissors.yaml
+conda activate scissors
+bash tests/workflow/run_workflow_tests.sh
+```
+
+Or have Snakemake build it per rule, which needs nothing on PATH but conda:
+
+```bash
+snakemake --cores 8 --software-deployment-method conda
+```
+
+**Two traps with Lmod (`module load`), both of which look like a missing
+package:**
+
+1. **An active conda environment shadows the module Python.** If your prompt
+   shows `(base)`, `python3` resolves to conda's interpreter and stays there no
+   matter what you `module load` — so loading `py-pysam` changes nothing about
+   which Python runs. Either `conda deactivate` first, or skip the modules and
+   use the conda environment above.
+
+2. **`pysam` and `pandas` modules may be built against different Python
+   versions**, in which case they cannot both be loaded. On Skyline,
+   `py-pysam/0.21.0` is built against `python/3.10.10` and `py-pandas/2.2.3`
+   against `python/3.11.9`, so each `module load` unloads the other's
+   interpreter:
+
+   ```
+   module load py-pysam   ->  python/3.11.9 => python/3.10.10
+   module load py-pandas  ->  python/3.10.10 => python/3.11.9
+                              python/3.10.10 (required by: py-pysam) not loaded
+   ```
+
+   Check yours with:
+
+   ```bash
+   module load py-pysam py-pandas && python3 -c 'import pysam, pandas; print("both OK")'
+   ```
+
+   If that fails, the conda route avoids the conflict entirely.
 
 ---
 

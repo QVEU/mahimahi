@@ -15,10 +15,92 @@
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
 
+# ---------------------------------------------------------------------------
+# Dependency check
+#
+# Reports exactly what is missing, and which interpreter was inspected. A bare
+# "missing" is not useful on a cluster, where the usual cause is not an absent
+# package but the wrong python being found -- see report_python_environment.
+# ---------------------------------------------------------------------------
+report_python_environment() {
+    echo "  python3:  $(command -v python3 || echo '<not found>')" >&2
+    if command -v python3 >/dev/null; then
+        echo "  version:  $(python3 --version 2>&1)" >&2
+    fi
+    if [[ -n "${CONDA_DEFAULT_ENV:-}" ]]; then
+        echo "  conda env active: ${CONDA_DEFAULT_ENV}" >&2
+        if [[ -n "${LOADEDMODULES:-}" ]]; then
+            echo >&2
+            echo "  NOTE: a conda environment is active AND Lmod modules are loaded." >&2
+            echo "  An active conda env puts its own python3 first on PATH, so" >&2
+            echo "  'module load py-pysam' has no effect on which interpreter runs." >&2
+            echo "  Either 'conda deactivate' before loading modules, or install the" >&2
+            echo "  dependencies into a conda env and skip the modules entirely." >&2
+        fi
+    fi
+}
+
+suggest_conda_env() {
+    cat >&2 <<'HINT'
+
+  Recommended: one conda environment with all of it, from the file in this repo.
+
+      conda env create -f workflow/envs/scissors.yaml
+      conda activate scissors
+      bash tests/workflow/run_workflow_tests.sh
+
+  Or let Snakemake manage it per rule:
+
+      snakemake --cores 8 --software-deployment-method conda
+
+  On an Lmod cluster, note that py-pysam and py-pandas may be built against
+  DIFFERENT python versions, in which case loading one unloads the other's
+  interpreter and they cannot both be active. Check with:
+
+      module load py-pysam py-pandas && python3 -c 'import pysam, pandas'
+
+  If that fails, the conda route above avoids the conflict.
+HINT
+}
+
+missing_tools=()
 for tool in snakemake minimap2 samtools python3; do
-    command -v "$tool" >/dev/null || { echo "SKIP: $tool not on PATH" >&2; exit 0; }
+    command -v "$tool" >/dev/null || missing_tools+=("$tool")
 done
-python3 -c 'import pysam, pandas' 2>/dev/null || { echo "SKIP: pysam/pandas missing" >&2; exit 0; }
+
+missing_modules=()
+if command -v python3 >/dev/null; then
+    for mod in pysam pandas; do
+        python3 -c "import ${mod}" 2>/dev/null || missing_modules+=("${mod}")
+    done
+else
+    missing_modules=(pysam pandas)
+fi
+
+if [[ ${#missing_tools[@]} -gt 0 || ${#missing_modules[@]} -gt 0 ]]; then
+    echo "SKIP: cannot run the workflow tests." >&2
+    [[ ${#missing_tools[@]} -gt 0 ]] &&         echo "  not on PATH:        ${missing_tools[*]}" >&2
+    [[ ${#missing_modules[@]} -gt 0 ]] &&         echo "  not importable:     ${missing_modules[*]}" >&2
+    echo >&2
+    report_python_environment
+    # Show the real import error for the first missing module; "missing" is
+    # often actually a broken build or an ABI mismatch.
+    if [[ ${#missing_modules[@]} -gt 0 ]] && command -v python3 >/dev/null; then
+        echo >&2
+        echo "  import error for '${missing_modules[0]}':" >&2
+        python3 -c "import ${missing_modules[0]}" 2>&1 | sed 's/^/    /' >&2
+    fi
+    suggest_conda_env
+    exit 0
+fi
+
+echo "dependencies OK:"
+echo "  python3    $(python3 --version 2>&1 | awk '{print $2}')  ($(command -v python3))"
+echo "  pysam      $(python3 -c 'import pysam; print(pysam.__version__)')"
+echo "  pandas     $(python3 -c 'import pandas; print(pandas.__version__)')"
+echo "  snakemake  $(snakemake --version 2>&1 | tail -1)"
+echo "  minimap2   $(minimap2 --version 2>&1 | head -1)"
+echo "  samtools   $(samtools --version 2>&1 | head -1 | awk '{print $2}')"
 
 CFG=tests/workflow/config_test.yaml
 failures=0
