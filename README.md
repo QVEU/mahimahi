@@ -9,43 +9,87 @@ enterovirus replication and the host transcriptional response within the same
 cells, by counting viral and reporter reads as ordinary features against a
 custom reference.
 
-This repository is a restructured version of `QVEU/SCISSORS`. The analysis is
-unchanged in intent; the reorganization fixes a set of bugs and removes
-hardcoded paths and indices. See [NEWS.md](NEWS.md) for the full list of
-changes, [docs/MIGRATION.md](docs/MIGRATION.md) for where each original script
-went, and [Known open questions](#known-open-questions) for the things that
-need a decision from someone who ran the original experiments.
+There are two tracks, which share the same cells:
 
-Shell scripts target the Skyline HPC cluster and its Slurm scheduler.
+- **Replication** ([`workflow/`](#the-strand-specific-counting-workflow)) --
+  a Snakemake pipeline counting, per cell and per template, how many positive-
+  and negative-strand UMIs map to a reference. For a (+)-strand RNA virus the
+  negative strand is the replication intermediate, so the (-)/(+) ratio
+  measures replication rather than viral load. This is the part the name is
+  built around.
+- **Host response** ([`scripts/` + `analysis/`](#host-response-cell-ranger--seurat))
+  -- Cell Ranger against a custom reference, then Seurat for QC, clustering and
+  markers.
+
+This repository is a restructured version of `QVEU/SCISSORS`, with the
+strand-counting workflow added. The analysis is unchanged in intent; the
+reorganization fixes a set of bugs and removes hardcoded paths and indices. See
+[NEWS.md](NEWS.md) for the full list of changes,
+[docs/MIGRATION.md](docs/MIGRATION.md) for where each original script went, and
+[Known open questions](#known-open-questions) for the things that need a
+decision from someone who ran the original experiments.
+
+The Cell Ranger shell scripts target the Skyline HPC cluster and Slurm. The
+Snakemake workflow has no cluster dependency.
+
+---
+
+## Check your install
+
+No data of your own needed. This generates synthetic reads with known
+per-cell, per-template, per-strand UMI counts, runs the workflow over all
+three supported input types, and checks every value against that truth:
+
+```bash
+bash tests/workflow/run_workflow_tests.sh     # needs snakemake, pysam, pandas, minimap2, samtools
+bash tests/run_tests.sh                       # R and shell unit tests
+```
+
+Expected tail:
+
+```
+ALL CHECKS PASSED across 3 input types (234 rows).
+# Workflow tests: all passed.
+```
+
+If either is missing tooling it says `SKIP` and exits 0 rather than failing.
 
 ---
 
 ## Pipeline overview
 
 ```
-                    scripts/00_mkref.sh
-              custom reference: GRCh38-2020-A
-                  + PV genome + GFP + mRuby3
-                              |
-                    scripts/01_mkfastq.sh
-                  BCL run dir -> per-sample FASTQs
-                              |
-                    scripts/02_count.sh
-                  FASTQs -> filtered_feature_bc_matrix
-                    (one job per sample, array-capable)
-                              |
-              +---------------+---------------+
-              |                               |
-   scripts/03_aggregate.sh          scripts/04_scrublet.py
-   (optional; Seurat path            doublet scores per cell,
-    does not read this)              keyed by barcode
-                                              |
-              +-------------------------------+
-              |                               |
-  analysis/CVB3_QC.Rmd            analysis/PV_mutants_integrated.R
-  analysis/EVA71_QC.Rmd           14 PV samples: infected-cell calling,
-  per-sample QC and clustering     QC, merge, cell-cycle regression,
-                                   clustering, markers
+  REPLICATION  (workflow/)                 HOST RESPONSE  (scripts/ + analysis/)
+  ────────────────────────────             ──────────────────────────────────────
+
+  reference FASTA                          scripts/00_mkref.sh
+  (viral genome, or genome                 GRCh38-2020-A + PV + GFP + mRuby3
+   + reporters/barcodes that                         │
+   distinguish templates)                  scripts/01_mkfastq.sh
+         │                                 BCL run dir -> per-sample FASTQs
+         │   config/samples.tsv                       │
+         │   FASTQ  ─or─  SAM/BAM/CRAM     scripts/02_count.sh
+         │        │                        -> filtered_feature_bc_matrix
+         └────────┤                                   │
+                  │                        scripts/04_scrublet.py
+         rule align / normalise            doublet scores, barcode-keyed
+                  │                                   │
+           rule extract_reads              ┌──────────┴──────────┐
+     per read: CBC, UMI, ref_name,         │                     │
+                strand                 CVB3_QC.Rmd    PV_mutants_integrated.R
+                  │                    EVA71_QC.Rmd   14 PV samples: infected
+        ┌─────────┴─────────┐          per-sample QC   calling, QC, merge,
+        │                   │          and clustering  cell-cycle regression,
+ rule tabulate_strands  rule strand_qc                 clustering, markers
+ distinct UMIs per       strand balance;                       │
+ cell × template ×       asserts the                           │
+ strand; Rep_Index       convention                            │
+        │                                                      │
+  results/scissors_counts.tsv.gz                               │
+        │                                                      │
+        └──────────────► analysis/scissors_replication.R ◄──────┘
+                         replication slopes and figures;
+                         optional join to the Seurat UMAP
 ```
 
 ## Repository layout
@@ -58,7 +102,7 @@ Shell scripts target the Skyline HPC cluster and its Slurm scheduler.
 | `scripts/02_count.sh` | Count one sample, or all of them as a Slurm array job. |
 | `scripts/03_aggregate.sh` | Optional `cellranger aggr` across samples. |
 | `scripts/04_scrublet.py` | Doublet scoring, emitting barcode-keyed TSVs. |
-| `scripts/samples.tsv` | `output_id` / `fastq_sample` / `fastq_dir` per sample. |
+| `scripts/samples.tsv` | Cell Ranger sample sheet: `output_id` / `fastq_sample` / `fastq_dir`. **Not** the workflow's sheet. |
 | `analysis/config.R` | Share-root resolution, sample lists, per-sample QC thresholds. |
 | `analysis/helpers.R` | Doublet joining, infected-cell calling, QC filtering. |
 | `analysis/CVB3_QC.Rmd` | Coxsackievirus B3 per-sample QC and clustering. |
@@ -71,11 +115,11 @@ Shell scripts target the Skyline HPC cluster and its Slurm scheduler.
 | `workflow/scripts/` | `embed_barcodes`, `extract_reads`, `tabulate_strands`, `strand_qc`, `merge_*`. |
 | `workflow/envs/scissors.yaml` | Conda environment for the workflow. |
 | `config/config.yaml` | Workflow configuration: reference, barcode layout, strand convention, filters. |
-| `config/samples.tsv` | One row per sample; input may be FASTQ or SAM/BAM/CRAM. |
+| `config/samples.tsv` | Workflow sample sheet: one row per sample; input may be FASTQ or SAM/BAM/CRAM. |
 | `tests/` | Offline regression tests for the correctness fixes. |
 | `tests/workflow/` | End-to-end workflow tests against synthetic ground truth. |
 
-## Running it
+## Host response: Cell Ranger + Seurat
 
 ### 0. Build the reference (once)
 
@@ -216,7 +260,7 @@ an already-aligned SAM/BAM/CRAM**, mixed freely in one run.
         results/scissors_counts.tsv.gz   results/strand_qc_summary.tsv
 ```
 
-### Running it
+### Running the workflow
 
 ```bash
 # describe your samples and reference

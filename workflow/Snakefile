@@ -56,6 +56,17 @@ def _read_samples():
 
     sheet = sheet.set_index("sample", drop=False)
 
+    placeholders = [s for s in sheet["sample"] if str(s).startswith("EXAMPLE_")]
+    if placeholders:
+        raise WorkflowError(
+            f"{path} still contains the shipped example rows: "
+            f"{', '.join(placeholders)}.\n"
+            f"Replace them with your own samples. Each row needs a unique "
+            f"'sample' name and an 'input' path to a FASTQ or a SAM/BAM/CRAM.\n"
+            f"\nTo check the installation without any data of your own, run the "
+            f"fixture-based demo instead:\n"
+            f"    bash tests/workflow/run_workflow_tests.sh")
+
     for sample, row in sheet.iterrows():
         target = row["input"]
         if not target:
@@ -83,6 +94,30 @@ def _barcode_source(sample, sheet=None):
 
 SAMPLES = _read_samples()
 SAMPLE_NAMES = list(SAMPLES["sample"])
+
+
+def _check_template():
+    """Fail early and clearly if a FASTQ sample has no reference to align to."""
+    needs_alignment = [s for s in SAMPLE_NAMES
+                       if SAMPLES.loc[s, "input"].endswith(FASTQ_SUFFIXES)]
+    if not needs_alignment:
+        return  # every input is pre-aligned; the reference is not read
+    target = config.get("template", "")
+    if not target:
+        raise WorkflowError(
+            "config 'template' is empty, but these samples are FASTQ and need "
+            f"aligning: {', '.join(needs_alignment)}.\n"
+            "Set 'template' in config/config.yaml to your reference FASTA.")
+    if not os.path.exists(target):
+        raise WorkflowError(
+            f"reference FASTA not found: {target}\n"
+            f"These samples are FASTQ and need it: {', '.join(needs_alignment)}.\n"
+            "Set 'template' in config/config.yaml to the reference you want to "
+            "count against -- a single viral genome, or a multi-sequence FASTA "
+            "whose entries distinguish co-infecting templates.")
+
+
+_check_template()
 
 
 def is_fastq(sample):
