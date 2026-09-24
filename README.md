@@ -55,6 +55,20 @@ ALL CHECKS PASSED across 3 input types (234 rows).
 If either is missing tooling it says `SKIP` and exits 0 rather than failing,
 and reports which interpreter it inspected and what could not be imported.
 
+### The whole thing, end to end
+
+```bash
+conda env create -f workflow/envs/scissors.yaml && conda activate scissors
+
+$EDITOR config/samples.tsv        # your samples: name + FASTQ or SAM/BAM path
+$EDITOR config/config.yaml        # your reference, barcode layout, strand convention
+
+snakemake --cores 8 -n            # check the plan
+snakemake --cores 8               # -> results/scissors_counts.tsv.gz
+
+Rscript analysis/scissors_replication.R   # -> results/figures/
+```
+
 ### Setting up on an HPC cluster
 
 Use **one conda environment**, from the file in this repo:
@@ -321,6 +335,67 @@ snakemake --cores 8 --software-deployment-method conda   # managed deps
 decides the route: a FASTQ gets aligned against `template`, a SAM/BAM/CRAM is
 used as-is. Optional columns are `mate_fastq` (the R1 barcode read),
 `barcode_source`, `datalabel`, and `whitelist`.
+
+### What you get
+
+```
+results/
+├── scissors_counts.tsv.gz          <- the main output: all samples, one row per cell x template
+├── strand_qc_summary.tsv              strand balance per template, all samples
+├── logs/
+└── <sample>/
+    ├── counts_wide.tsv.gz             this sample's rows of the merged table
+    ├── counts_long.tsv.gz             one row per cell x template x strand
+    ├── reads.tsv.gz                   per-read intermediate: CBC, UMI, ref_name, strand
+    ├── strand_qc.tsv                  strand balance per template
+    ├── extract_stats.json             read dispositions: kept, unmapped, low_mapq, no_barcode
+    └── logs/                          one log per rule
+```
+
+**`results/scissors_counts.tsv.gz`** — what the analysis reads. One row per
+(cell, template):
+
+| column | meaning |
+| --- | --- |
+| `CBC` | cell barcode, as sequenced, suffix stripped |
+| `ref_name` | template: a FASTA entry from the reference |
+| `sample` | sample name from `config/samples.tsv` |
+| `datalabel` | genotype label shared across runs (sample with a trailing `_S<n>` removed) |
+| `CBC_readcount` | reads for this cell, before UMI collapsing |
+| `UMI_count` | distinct viral UMIs for this cell, across all templates and strands |
+| `Neg` | distinct negative-strand UMIs, **this cell and this template** |
+| `Pos` | distinct positive-strand UMIs, this cell and this template |
+| `Neg_PosRatio` | `Neg / (Pos + 1)` |
+| `Rep_Index` | `Neg / (Pos + Neg)` — the replication index, (−)/total |
+
+`Neg` and `Pos` being per-template is the substantive difference from the old
+`*_CBC_SCISSORS.csv`, where they were averaged across every template in the
+cell. See [docs/MIGRATION.md](docs/MIGRATION.md#column-mapping).
+
+**`results/<sample>/strand_qc.tsv`** — one row per template, with
+`Pos`, `Neg`, `total_umis`, `pos_frac`, `neg_frac`, `neg_over_pos`. The first
+thing to look at after a run: for a (+)-strand virus `pos_frac` should be well
+above 0.9 on a sense control and `neg_over_pos` in the 0.005–0.05 range on the
+viral templates.
+
+**`results/<sample>/extract_stats.json`** — records what was kept and what the
+run assumed, so a count table carries its own provenance:
+
+```json
+{ "strand_convention": "reverse_is_positive", "barcode_source": "read_name",
+  "barcode_length": 16, "umi_length": 12, "min_mapq": 55,
+  "counts": { "total": 50295, "kept": 50295, "kept_Pos": 45039, "kept_Neg": 5256 } }
+```
+
+If `kept` is far below `total`, the breakdown (`unmapped`, `low_mapq`,
+`no_barcode`, `secondary`, `supplementary`) says which filter is responsible.
+
+**`results/figures/`** — from `analysis/scissors_replication.R`:
+`neg_vs_pos.pdf`, `replication_rate_slope.pdf`, `replication_rate_index.pdf`,
+`rep_index_distribution.pdf`, `donor_acceptor.pdf`, plus
+`replication_slopes.csv` (with `slope`, `conf_low`, `conf_high`, `n_cells` and
+a `status` column) and `replication_indices.csv`.
+
 
 ### Where the barcode comes from
 
