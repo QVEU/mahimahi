@@ -262,5 +262,13 @@ safe_feature_percentage <- function(object, feature) {
     warning("Feature '", feature, "' not in the object; reporting 0%.", call. = FALSE)
     return(rep(0, ncol(object)))
   }
-  Seurat::PercentageFeatureSet(object, features = feature)[, 1]
+  result <- Seurat::PercentageFeatureSet(object, features = feature)
+
+  ## Seurat v4 returned a one-column data.frame from PercentageFeatureSet;
+  ## v5.0 returns a plain numeric vector, so the `[, 1]` this used to do fails
+  ## with "incorrect number of dimensions". Accept either shape rather than
+  ## pinning to one: this is the kind of return type that moves between
+  ## releases, and the smoke test only caught it because it runs the real
+  ## package.
+  if (is.null(dim(result))) as.numeric(result) else as.numeric(result[, 1])
 }

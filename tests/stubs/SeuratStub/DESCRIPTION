@@ -1,9 +1,11 @@
 Package: Seurat
 Type: Package
 Title: Test Stub For Pipeline Validation
-Version: 4.4.0
+Version: 5.0.1
 Author: stub
 Maintainer: stub <stub@example.com>
 Description: Minimal stub of AddMetaData/PercentageFeatureSet used only to
     validate SCISSORS helper logic offline. Not the real Seurat package.
+    Mirrors Seurat 5 semantics: PercentageFeatureSet returns a numeric vector,
+    where v4 returned a one-column data.frame.
 License: MIT + file LICENSE

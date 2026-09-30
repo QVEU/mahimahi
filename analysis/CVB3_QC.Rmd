@@ -17,17 +17,17 @@ library(patchwork)
 library(ggplot2)
 library(Seurat)
 library(SeuratObject)
-library(clustree)
 
-## This analysis targets Seurat v4. Pin the environment once, outside the
+## This analysis targets Seurat v5. Install the environment once, outside the
 ## notebook -- the pre-restructure version carried install_version() calls in a
 ## chunk, which reinstalled Seurat on every knit:
 ##
-##   remotes::install_version("SeuratObject", "4.1.4",
-##     repos = c("https://satijalab.r-universe.dev", getOption("repos")))
-##   remotes::install_version("Seurat", "4.4.0",
-##     repos = c("https://satijalab.r-universe.dev", getOption("repos")))
-stopifnot(packageVersion("Seurat") >= "4.0.0", packageVersion("Seurat") < "5.0.0")
+##   conda env create -f workflow/envs/scissors.yaml && conda activate scissors
+##
+## Originally written against Seurat 4.4.0, now archived on CRAN. This notebook
+## builds a single-sample object, so it has one layer and needs no JoinLayers;
+## see analysis/PV_mutants_integrated.R for the merged case.
+stopifnot(packageVersion("Seurat") >= "5.0.0")
 
 source(file.path(rprojroot::find_root(rprojroot::has_file("config.sh")), "analysis", "config.R"))
 source(file.path(rprojroot::find_root(rprojroot::has_file("config.sh")), "analysis", "helpers.R"))
@@ -203,7 +203,11 @@ ElbowPlot(obj)
 obj <- FindNeighbors(obj, dims = 1:20, verbose = FALSE)
 obj <- FindClusters(obj, resolution = seq(0.1, 1, by = 0.05), verbose = FALSE)
 
-clustree(obj)
+if (requireNamespace("clustree", quietly = TRUE)) {
+  print(clustree::clustree(obj))
+} else {
+  message("clustree is not installed; skipping the cluster-stability plot.")
+}
 head(obj[[]])
 ```
 
@@ -241,13 +245,25 @@ markers <- FindAllMarkers(obj, only.pos = TRUE)
 write.csv(markers,
           file = file.path(RESULTS_DIR, paste0(SAMPLE_ID, ".markers_Pos.csv")))
 
-markers %>%
-  group_by(cluster) %>%
-  dplyr::filter(avg_log2FC > 1) %>%
-  slice_head(n = 10) %>%
-  ungroup() -> top10_markers
+## FindAllMarkers returns a zero-row frame -- with no columns at all, so not
+## even `cluster` -- when the chosen resolution yields a single cluster or no
+## gene reaches significance. Grouping on `cluster` then fails with
+## "Column `cluster` is not found", which points at dplyr rather than at the
+## clustering. Check first and say what actually happened.
+if (nrow(markers) == 0L || !"cluster" %in% colnames(markers)) {
+  warning("FindAllMarkers found no markers at resolution ", RESOLUTION,
+          " (", nlevels(Idents(obj)), " cluster(s)); skipping the heatmap.\n",
+          "  Raise RESOLUTION, or check that this sample has real structure.",
+          call. = FALSE)
+} else {
+  markers %>%
+    group_by(cluster) %>%
+    dplyr::filter(avg_log2FC > 1) %>%
+    slice_head(n = 10) %>%
+    ungroup() -> top10_markers
 
-DoHeatmap(obj, features = top10_markers$gene) + NoLegend()
+  print(DoHeatmap(obj, features = top10_markers$gene) + NoLegend())
+}
 ```
 
 ```{r marker-panel, fig.width=10, fig.height=8}

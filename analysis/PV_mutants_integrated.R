@@ -14,22 +14,27 @@
 
 library(Seurat)
 library(SeuratObject)
-library(clustree)
-library(tidyverse)
+library(ggplot2)
 library(ggrepel)
+
+## clustree is loaded lazily where it is used. It draws one diagnostic plot
+## (cluster stability across resolutions) and is not packaged for every
+## platform, so a missing plotting library should not take down the analysis.
+##
+## tidyverse was previously loaded here and never used: this script has no
+## pipes and no dplyr verbs, only ggplot2.
 
 ## Package installation is deliberately NOT done here. The pre-restructure
 ## script called remotes::install_version() unconditionally at the top, which
-## reinstalled Seurat on every source(). Pin the environment once:
+## reinstalled Seurat on every source(). Install the environment once, from
+## workflow/envs/scissors.yaml:
 ##
-##   remotes::install_version("SeuratObject", "4.1.4",
-##     repos = c("https://satijalab.r-universe.dev", getOption("repos")))
-##   remotes::install_version("Seurat", "4.4.0",
-##     repos = c("https://satijalab.r-universe.dev", getOption("repos")))
+##   conda env create -f workflow/envs/scissors.yaml && conda activate scissors
 ##
-## This analysis targets Seurat v4. It will not run unchanged on v5, where
-## layers change how merge() and the RNA assay behave.
-stopifnot(packageVersion("Seurat") >= "4.0.0", packageVersion("Seurat") < "5.0.0")
+## This analysis targets Seurat v5. It was originally written against v4.4.0,
+## which is now archived on CRAN; see NEWS.md for what the port changed and
+## why results may differ from the v4 run.
+stopifnot(packageVersion("Seurat") >= "5.0.0")
 
 ## Locate this script's directory so config.R/helpers.R resolve whether the
 ## file is run with Rscript, sourced, or knitted.
@@ -139,6 +144,18 @@ for (id in names(sample_list)) {
 
 filtered <- merge(x = sample_list[[1]], y = sample_list[-1])
 
+## Seurat v5 leaves a merged object with one layer per input (counts.1,
+## counts.2, ...) rather than a single combined matrix. NormalizeData,
+## FindVariableFeatures and ScaleData then operate per layer, and
+## FindAllMarkers errors outright on unjoined layers. Joining here restores the
+## v4 behaviour the rest of this script was written against, so the scaling,
+## PCA and marker steps below need no other change.
+##
+## Verify rather than assume: a Seurat version that changes merge() again
+## should fail here, not silently produce per-layer results.
+filtered <- JoinLayers(filtered)
+stopifnot(length(SeuratObject::Layers(filtered, search = "counts")) == 1L)
+
 message("Merged: ", ncol(filtered), " cells across ", length(sample_list), " samples.")
 print(table(filtered$predicted_doublets, filtered$orig.ident))
 
@@ -186,7 +203,12 @@ merged_seurat <- FindNeighbors(merged_seurat, dims = PV_PCA_DIMS, verbose = FALS
 ################################################################################
 
 clustered <- FindClusters(merged_seurat, resolution = PV_RESOLUTIONS)
-print(clustree(clustered))
+if (requireNamespace("clustree", quietly = TRUE)) {
+  print(clustree::clustree(clustered))
+} else {
+  message("clustree is not installed; skipping the cluster-stability plot. ",
+          "The clustering itself is unaffected.")
+}
 
 resolution_column <- paste0("RNA_snn_res.", PV_FINAL_RESOLUTION)
 stopifnot(resolution_column %in% colnames(clustered[[]]))
@@ -251,7 +273,22 @@ write.csv(markers,
 
 ################################################################################
 ### Volcano plot per cluster
+###
+### FindAllMarkers returns zero rows when no cluster has a differentially
+### expressed gene -- on data with little structure, or at a resolution that
+### produces a single cluster. Assigning into a 0-row data.frame fails with
+### "replacement has 1 row, data has 0", which says nothing about the cause,
+### so the volcano is skipped with a message that does.
 ################################################################################
+
+if (nrow(markers) == 0L) {
+  warning("FindAllMarkers found no differentially expressed genes at ",
+          "resolution ", PV_FINAL_RESOLUTION, " (", nlevels(Idents(clustered)),
+          " cluster(s)); skipping the volcano plot.\n",
+          "  On real data this usually means the clustering resolution is too ",
+          "low, or the samples are more homogeneous than expected.",
+          call. = FALSE)
+} else {
 
 markers$diffexpressed <- "NO"
 markers$diffexpressed[markers$avg_log2FC >  1 & markers$p_val_adj < 0.05] <- "UP"
@@ -281,6 +318,8 @@ volcano <- ggplot(markers, aes(avg_log2FC, -log10(p_val_adj), shape = clusters))
 ## which painted over them, and clipped the y axis at 30000 with
 ## coord_cartesian. Grey is now the base layer and the axis is left to the data.
 print(volcano + geom_label_repel(size = 2, aes(label = delabel), max.overlaps = 1000))
+
+}  # end if (nrow(markers) > 0)
 
 ################################################################################
 ### Marker panel

@@ -1,12 +1,39 @@
 source("analysis/helpers.R")
 
+## Build a real Seurat object when the real package is available, so
+## read_doublet_scores() is exercised against the actual AddMetaData generic.
+## Under tests/run_tests.sh --stubs the stub does not export
+## CreateSeuratObject, and the matrix-with-attribute mock is used instead.
+##
+## This matters: the matrix mock passed against the stub's plain-function
+## AddMetaData but fails against the real S3 generic with "no applicable
+## method for 'AddMetaData' applied to an object of class matrix" -- so a
+## stub-only test could hide a real incompatibility.
+USE_REAL_SEURAT <- requireNamespace("Seurat", quietly = TRUE) &&
+  is.function(tryCatch(get("CreateSeuratObject", asNamespace("Seurat")),
+                       error = function(e) NULL))
+
+cat("mock objects:", if (USE_REAL_SEURAT) "real Seurat" else "matrix stub", "\n\n")
+
 mock_object <- function(cells) {
+  if (USE_REAL_SEURAT) {
+    set.seed(length(cells))
+    counts <- matrix(rpois(length(cells) * 6L, 20),
+                     nrow = 6L,
+                     dimnames = list(sprintf("GENE%d", seq_len(6L)), cells))
+    return(suppressWarnings(
+      Seurat::CreateSeuratObject(counts = counts, min.cells = 0, min.features = 0)))
+  }
   m <- matrix(0, nrow = 1, ncol = length(cells),
               dimnames = list("GENE1", cells))
   attr(m, "meta") <- list()
   m
 }
-md <- function(obj, field) attr(obj, "meta")[[field]]
+
+md <- function(obj, field) {
+  if (USE_REAL_SEURAT) return(unname(obj[[field]][, 1]))
+  attr(obj, "meta")[[field]]
+}
 tmp <- tempfile(fileext = ".tsv")
 
 barcodes <- sprintf("CELL%03d-1", 1:100)

@@ -53,7 +53,7 @@ RESULTS_DIR    <- file.path(SHARE_ROOT, "Projects", "CM_kb")
 ## Poliovirus samples for the integrated analysis. Must match the output_id
 ## column of scripts/samples.tsv. Mock is kept last only for readability now --
 ## PV_mutants_integrated.R no longer depends on its position (see NEWS).
-PV_SAMPLE_IDS <- c(
+PV_SAMPLE_IDS_ALL <- c(
   "RFP_C109S_PV",
   "WT_GFP_PV",
   "WT_GFP_RFP_Y88P_PV",
@@ -69,6 +69,26 @@ PV_SAMPLE_IDS <- c(
   "WT_IRES_mRuby3_MutPol_WT_IRES_GFP_PV",
   "Mock_5h_PV"
 )
+
+## SCISSORS_PV_SAMPLE_IDS restricts the run to a comma-separated subset, for a
+## quick check on a few samples or for the smoke test in tests/seurat/, which
+## cannot afford to synthesise all fourteen. Unknown names are an error rather
+## than silently ignored -- a typo here would otherwise just drop a sample.
+PV_SAMPLE_IDS <- local({
+  override <- Sys.getenv("SCISSORS_PV_SAMPLE_IDS", unset = "")
+  if (!nzchar(override)) return(PV_SAMPLE_IDS_ALL)
+  ids <- trimws(strsplit(override, ",", fixed = TRUE)[[1]])
+  ids <- ids[nzchar(ids)]
+  unknown <- setdiff(ids, PV_SAMPLE_IDS_ALL)
+  if (length(unknown) > 0) {
+    stop("SCISSORS_PV_SAMPLE_IDS names sample(s) not in PV_SAMPLE_IDS_ALL: ",
+         paste(unknown, collapse = ", "))
+  }
+  message("SCISSORS_PV_SAMPLE_IDS: restricted to ", length(ids), " of ",
+          length(PV_SAMPLE_IDS_ALL), " samples (",
+          paste(ids, collapse = ", "), ")")
+  ids
+})
 
 ## Uninfected controls, excluded from viral-load mixture modelling.
 MOCK_SAMPLE_IDS <- c("Mock_5h_PV")

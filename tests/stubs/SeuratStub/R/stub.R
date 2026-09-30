@@ -18,6 +18,9 @@ AddMetaData <- function(object, metadata, col.name) {
   object
 }
 
+# Seurat v5.0 returns a plain numeric vector here, not the one-column
+# data.frame v4 returned. The stub mirrors v5 so a test passing against the
+# stub cannot pass for a shape the real package no longer produces.
 PercentageFeatureSet <- function(object, pattern = NULL, features = NULL) {
-  matrix(0, nrow = ncol(object), ncol = 1)
+  rep(0, ncol(object))
 }

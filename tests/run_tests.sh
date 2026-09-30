@@ -52,6 +52,17 @@ run "R Markdown chunk parsing" Rscript tests/check_rmd_parses.R analysis/CVB3_QC
 run "Doublet score joining (helpers.R)" Rscript tests/test_doublet_join.R
 run "Infected status calling (helpers.R)" Rscript tests/test_infected_status.R
 run "Replication slope fitting (replication.R)" Rscript tests/test_replication_fit.R
+if [[ "${USE_STUBS}" -eq 1 ]]; then
+    echo
+    echo "################################################################"
+    echo "# Seurat analyses end-to-end"
+    echo "################################################################"
+    echo "SKIPPED: --stubs masks the real Seurat with tests/stubs/SeuratStub."
+    echo "  These analyses must run against the real package. Re-run without"
+    echo "  --stubs, or: bash tests/seurat/run_seurat_smoke.sh"
+else
+    run "Seurat analyses end-to-end" bash tests/seurat/run_seurat_smoke.sh
+fi
 
 echo ""
 echo "################################################################"
