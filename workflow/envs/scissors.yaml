@@ -1,13 +1,78 @@
-# conda environment for the SCISSORS workflow
+# Conda environment for the whole of SCISSORS -- the Snakemake strand-counting
+# workflow, the doublet step, and the R analyses.
+#
+#   conda env create -f workflow/envs/scissors.yaml
+#   conda activate scissors
+#
+# or let Snakemake build it per rule:
+#
 #   snakemake --cores 8 --software-deployment-method conda
+#
+# Versions are FLOORS, chosen against what the code actually requires rather
+# than what happened to be installed when it was written. The originals pinned
+# Seurat 4.4.0 / SeuratObject 4.1.4 and depended on the standalone `scrublet`;
+# all three are now archived or unmaintained, which is what made the pipeline
+# hard to install at all.
+#
+# Floors state what the code actually REQUIRES, not what is newest -- a floor
+# that rejects a working environment is a bug. conda-forge resolves to current
+# versions regardless. Where a floor is hard, it is because the older release
+# genuinely does not work: Seurat 5 for the layer-aware merge(), scanpy for a
+# maintained scrublet.
+#
+# Verified against, at the time of writing:
+#   python 3.11.15   pysam 0.24.1    pandas 2.3.3 and 3.0.6   scanpy 1.11.5
+#   scikit-image 0.26.0              snakemake 9.27.0
+#   minimap2 2.26    samtools 1.19.2
+#   R 4.3.3          Seurat 5.0.1    SeuratObject 5.0.1       mixtools 2.0.0
+#   ggplot2 3.4.4    data.table 1.14.10                       rmarkdown 2.25
+#
+# For an exact reproduction use the companion lockfile:
+#   conda env create -f workflow/envs/scissors.lock.yml
+#
+# NOTE on apt: Ubuntu's r-cran-* packages are considerably older than
+# conda-forge's (R 4.3.3, ggplot2 3.4.4, data.table 1.14.10 at the time of
+# writing), so installing the R side from apt defeats the point of these
+# floors. Use conda.
 name: scissors
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python >=3.10
-  - snakemake-minimal >=8
-  - pysam >=0.21
-  - pandas >=1.5
-  - minimap2 >=2.24
-  - samtools >=1.17
+  # ---- Python -------------------------------------------------------------
+  - python >=3.11
+  - snakemake-minimal >=8.18        # --software-deployment-method, not --use-conda
+  - pysam >=0.22
+  - pandas >=2.1                    # exercised on 2.3.3 and 3.0.6
+  - numpy >=1.24
+
+  # scanpy supersedes the standalone `scrublet` package, which has been frozen
+  # at 0.2.3 for years. scikit-image is NOT a hard dependency of scanpy but IS
+  # required by scanpy.pp.scrublet to pick the doublet-score threshold
+  # automatically -- without it the run fails at that call.
+  - scanpy >=1.10
+  - scikit-image >=0.22
+
+  # ---- Alignment ----------------------------------------------------------
+  - minimap2 >=2.26
+  - samtools >=1.19
+
+  # ---- R ------------------------------------------------------------------
+  - r-base >=4.4
+  - r-seurat >=5.0                  # v4 is archived on CRAN; see NEWS.md
+  - r-seuratobject >=5.0
+  - r-matrix >=1.6
+  - r-mixtools >=2.0
+  - r-ggplot2 >=3.4                  # linewidth= aesthetic (3.4.0+)
+  - r-ggrepel >=0.9
+  - r-dplyr >=1.1
+  - r-patchwork >=1.2
+  - r-data.table >=1.14             # >=1.15 reads .gz without R.utils;
+                                    # read_counts_table() handles older
+  - r-rmarkdown >=2.25
+  - r-rprojroot >=2.0
+  - pandoc >=3.0                    # knitr renders the .Rmd notebooks
+
+  # clustree draws one cluster-stability diagnostic and is loaded lazily, so
+  # the analyses run without it. Listed because it is wanted when available.
+  - r-clustree >=0.5

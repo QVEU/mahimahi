@@ -156,6 +156,54 @@ for sample in CVB3_TT EVA71_TT; do
     check "${sample}: ${n:-0} marker rows (real path, not the guard)" $?
 done
 
+step "6. Run scripts/04_scrublet.py and join its output back in R"
+# This is the seam between the Python and R halves: scanpy writes the doublet
+# scores, and read_doublet_scores() in analysis/helpers.R has to be able to
+# join them BY BARCODE. Testing the two separately would not catch a format
+# drift between them.
+if python3 -c 'import scanpy, skimage' 2>/dev/null; then
+    M="$CR/CVB3_TT/outs/filtered_feature_bc_matrix"
+    rm -f "$M/CVB3_TT_Doublet_scores.tsv"
+    python3 scripts/04_scrublet.py CVB3_TT --matrix-dir "$M" \
+        > "$OUTDIR/scrublet.log" 2>&1
+    check "04_scrublet.py exits 0" $?
+    [[ $? -ne 0 ]] && tail -10 "$OUTDIR/scrublet.log"
+
+    [[ -s "$M/CVB3_TT_Doublet_scores.tsv" ]]
+    check "wrote CVB3_TT_Doublet_scores.tsv" $?
+
+    header=$(head -1 "$M/CVB3_TT_Doublet_scores.tsv")
+    [[ "$header" == $'barcode\tdoublet_score\tpredicted_doublet' ]]
+    check "output is barcode-keyed (header: $header)" $?
+
+    n_scores=$(( $(wc -l < "$M/CVB3_TT_Doublet_scores.tsv") - 1 ))
+    n_cells=$(zcat "$M/barcodes.tsv.gz" | wc -l)
+    [[ "$n_scores" -eq "$n_cells" ]]
+    check "one score per barcode ($n_scores scores, $n_cells barcodes)" $?
+
+    # The real integration check: helpers.R must join it by name.
+    SCORE_FILE="$M/CVB3_TT_Doublet_scores.tsv" MATRIX_DIR="$M" Rscript -e '
+      suppressPackageStartupMessages(library(Seurat))
+      source("analysis/helpers.R")
+      counts <- Read10X(Sys.getenv("MATRIX_DIR"))
+      obj <- CreateSeuratObject(counts, min.cells = 0, min.features = 0)
+      obj <- suppressMessages(read_doublet_scores(
+        obj, path = Sys.getenv("SCORE_FILE"), sample_id = "CVB3_TT"))
+      sc <- obj[["doublet_scores"]][, 1]
+      stopifnot(length(sc) == ncol(obj), !any(is.na(sc)),
+                all(sc >= 0), all(sc <= 1))
+      cat(sprintf("  joined %d scanpy scores by barcode, range %.4f-%.4f
+",
+                  length(sc), min(sc), max(sc)))' 2>/dev/null
+    check "read_doublet_scores() joins scanpy output by barcode" $?
+else
+    echo "  SKIP  scanpy/scikit-image not installed; 04_scrublet.py not exercised"
+    if [[ "$REQUIRE_DEPS" -eq 1 ]]; then
+        echo "  (--require-deps given, so this is a failure)" >&2
+        failures=$((failures + 1))
+    fi
+fi
+
 echo
 echo "################################################################"
 if [[ "$failures" -eq 0 ]]; then
