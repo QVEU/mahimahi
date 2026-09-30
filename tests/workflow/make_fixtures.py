@@ -12,7 +12,11 @@ both, which is why donor and acceptor replication could not be distinguished.
 """
 
 import gzip
+import io
 import json
+import shutil
+import subprocess
+import sys
 import os
 import random
 
@@ -65,6 +69,20 @@ for _n in range(POPULATION_CELLS):
 READS_PER_UMI = 3
 
 
+def gzip_text(path):
+    """Open a .gz for text writing with a zeroed mtime.
+
+    gzip.open() stamps the current time into the gzip header, so regenerating
+    identical reads yields a different file and a spurious diff every time.
+    These fixtures are committed, so the bytes have to be reproducible. The
+    reads themselves are already deterministic (fixed seed) -- only the header
+    moved.
+    """
+    return io.TextIOWrapper(
+        gzip.GzipFile(filename=path, mode="wb", compresslevel=6, mtime=0),
+        encoding="utf-8")
+
+
 def _cbc_for(cell):
     """Stable 16 nt barcode per cell name, padded with a non-informative base."""
     stem = cell.replace("CELL_", "").replace("POP", "P")
@@ -112,13 +130,13 @@ def main():
     qual = "I" * READ_LEN
 
     # --- (a) DRAGEN-style: CBC+UMI in colon field 7 of the read name ----
-    with gzip.open(os.path.join(FIXTURES, "dragen_S1_R2_001.fastq.gz"), "wt") as fh:
+    with gzip_text(os.path.join(FIXTURES, "dragen_S1_R2_001.fastq.gz")) as fh:
         for rid, cbc, umi, seq in records:
             fh.write(f"@{rid}:{cbc}{umi}\n{seq}\n+\n{qual}\n")
 
     # --- (b) raw 10x: barcode in R1, cDNA in R2 -------------------------
-    with gzip.open(os.path.join(FIXTURES, "raw10x_S2_R1_001.fastq.gz"), "wt") as r1, \
-         gzip.open(os.path.join(FIXTURES, "raw10x_S2_R2_001.fastq.gz"), "wt") as r2:
+    with gzip_text(os.path.join(FIXTURES, "raw10x_S2_R1_001.fastq.gz")) as r1, \
+         gzip_text(os.path.join(FIXTURES, "raw10x_S2_R2_001.fastq.gz")) as r2:
         for rid, cbc, umi, seq in records:
             bc_seq = cbc + umi + "T" * 10          # barcode + UMI + polyT tail
             r1.write(f"@{rid} 1:N:0:1\n{bc_seq}\n+\n{'I' * len(bc_seq)}\n")
@@ -127,6 +145,7 @@ def main():
     # --- (c) Cell Ranger-style BAM with CB/UB tags ----------------------
     # Written as SAM here; the workflow's normalise_alignments sorts it.
     sam_path = os.path.join(FIXTURES, "tagged_S3.sam")
+    bam_path = os.path.join(FIXTURES, "tagged_S3.bam")
     with open(sam_path, "w") as fh:
         fh.write("@HD\tVN:1.6\tSO:unsorted\n")
         for name, seq in refs.items():
@@ -146,6 +165,20 @@ def main():
                             f"SIM_T:{counter}\t{flag}\t{template}\t{pos}\t60\t"
                             f"{READ_LEN}M\t*\t0\t0\t{s}\t{qual}\t"
                             f"CB:Z:{cbc}-1\tUB:Z:{umi}\n")
+
+    # Convert to BAM and drop the SAM: 16 MB of text becomes a few hundred KB,
+    # which is the difference between committable example data and not.
+    if shutil.which("samtools"):
+        # --no-PG: samtools otherwise records its own command line, including
+        # the output path, in an @PG header line -- which makes the BAM differ
+        # between runs in different directories and breaks --check.
+        subprocess.run(["samtools", "view", "--no-PG", "-b", "-o", bam_path, sam_path],
+                       check=True)
+        os.remove(sam_path)
+    else:
+        print("WARNING samtools not found; leaving tagged_S3.sam uncompressed. "
+              "The committed fixture is a .bam, so run this where samtools "
+              "is available before committing.", file=sys.stderr)
 
     # --- ground truth ---------------------------------------------------
     expected = []
@@ -177,5 +210,45 @@ def main():
               f"Pos={e['Pos']:3d} Neg={e['Neg']:2d}  Rep_Index={ri}")
 
 
+def check():
+    """Regenerate into a temp dir and diff against the committed fixtures.
+
+    The fixtures are committed, so they can silently fall out of step with the
+    generator. This makes that a test failure rather than a surprise.
+    """
+    import filecmp
+    import tempfile
+
+    global FIXTURES
+    committed = FIXTURES
+    if not os.path.isdir(committed):
+        sys.exit(f"--check: no committed fixtures at {committed}")
+    expected = sorted(os.listdir(committed))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        FIXTURES = tmp
+        main()
+        produced = sorted(os.listdir(tmp))
+
+        if produced != expected:
+            sys.exit("--check FAILED: file lists differ\n"
+                     f"  committed: {expected}\n  regenerated: {produced}")
+
+        differing = [f for f in expected
+                     if not filecmp.cmp(os.path.join(committed, f),
+                                        os.path.join(tmp, f), shallow=False)]
+
+    if differing:
+        sys.exit("--check FAILED: committed fixtures differ from regenerated:\n"
+                 + "\n".join(f"  {f}" for f in differing)
+                 + "\n\nRegenerate and commit:\n"
+                   "  python3 tests/workflow/make_fixtures.py")
+    print(f"--check OK: {len(expected)} committed fixtures are byte-identical "
+          "to a fresh regeneration")
+
+
 if __name__ == "__main__":
-    main()
+    if "--check" in sys.argv:
+        check()
+    else:
+        main()

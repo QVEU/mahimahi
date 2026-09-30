@@ -33,6 +33,17 @@ RUN_NAME="${2:-QVEU0056}"
 [[ -d "${RUN_DIR}" ]] || { echo "BCL run directory not found: ${RUN_DIR}" >&2; exit 1; }
 [[ -f "${SAMPLE_SHEET}" ]] || { echo "Sample sheet not found: ${SAMPLE_SHEET}" >&2; exit 1; }
 
+# Demultiplexer note. bcl2fastq2 is end-of-life at Illumina, superseded by
+# bcl-convert, and `cellranger mkfastq` is itself deprecated in recent Cell
+# Ranger releases in favour of running bcl-convert directly.
+#
+# This is deliberately NOT switched automatically. The demultiplexer decides
+# the read-name layout, and the strand-counting workflow parses the cell
+# barcode out of that name (config/config.yaml barcode.name_format /
+# name_field). Changing demultiplexer silently would move the barcode and
+# break the parse -- so if you move to bcl-convert, re-check name_field
+# against a real read name and re-run
+# tests/workflow/run_workflow_tests.sh first.
 module load "${CELLRANGER_MODULE}"
 module load "${BCL2FASTQ_MODULE}"
 

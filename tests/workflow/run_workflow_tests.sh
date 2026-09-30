@@ -106,8 +106,16 @@ CFG=tests/workflow/config_test.yaml
 failures=0
 step() { echo; echo "### $*"; }
 
-step "1. Generate fixtures with known ground truth"
-python3 tests/workflow/make_fixtures.py || { echo "FAILED"; exit 1; }
+step "1. Example data"
+# The fixtures are committed, so a fresh clone can run this immediately. Verify
+# they still match the generator rather than trusting that they do; regenerate
+# only when asked.
+if [[ "${1:-}" == "--regenerate" ]]; then
+    python3 tests/workflow/make_fixtures.py || { echo "FAILED: generation"; exit 1; }
+else
+    python3 tests/workflow/make_fixtures.py --check \
+        || { echo "FAILED: committed fixtures do not match the generator"; failures=$((failures+1)); }
+fi
 
 step "2. Lint the workflow"
 snakemake --configfile "$CFG" --cores 1 --lint 2>&1 | tail -20

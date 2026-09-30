@@ -72,10 +72,21 @@ if [[ -d "${OUTPUT_DIR}" ]]; then
     exit 1
 fi
 
+# `--create-bam` is mandatory from Cell Ranger 8.0 and rejected by 7.x, so the
+# flag is derived from the installed version rather than hardcoded. An
+# unparseable version fails here, before the counting starts.
+if ! BAM_FLAG="$(cellranger_count_bam_flag)"; then
+    exit 1
+fi
+
 echo "Sample:        ${OUTPUT_ID} (FASTQ prefix ${FASTQ_SAMPLE})"
 echo "Transcriptome: ${TRANSCRIPTOME}"
+echo "Cell Ranger:   $(cellranger_version)${BAM_FLAG:+  (passing ${BAM_FLAG})}"
 echo "Cores/memory:  $(cellranger_localcores) cores, $(cellranger_localmem)G"
 
+# BAM_FLAG is deliberately unquoted: it is empty on 7.x, and an empty quoted
+# string would be passed as a stray argument.
+# shellcheck disable=SC2086
 cellranger count \
     --id="${OUTPUT_ID}" \
     --sample="${FASTQ_SAMPLE}" \
@@ -83,6 +94,7 @@ cellranger count \
     --fastqs="${FASTQ_DIR}" \
     --localcores="$(cellranger_localcores)" \
     --localmem="$(cellranger_localmem)" \
+    ${BAM_FLAG} \
     --output-dir "${OUTPUT_DIR}"
 
 echo "Counts written to ${OUTPUT_DIR}/outs/filtered_feature_bc_matrix/"

@@ -1,4 +1,4 @@
 sample	input	mate_fastq	barcode_source	datalabel	whitelist
 dragen_S1	tests/workflow/fixtures/dragen_S1_R2_001.fastq.gz				
 raw10x_S2	tests/workflow/fixtures/raw10x_S2_R2_001.fastq.gz	tests/workflow/fixtures/raw10x_S2_R1_001.fastq.gz	paired_fastq		
-tagged_S3	tests/workflow/fixtures/tagged_S3.sam		tags		
+tagged_S3	tests/workflow/fixtures/tagged_S3.bam		tags		

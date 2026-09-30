@@ -1,0 +1,636 @@
+{
+  "reads_per_umi": 3,
+  "barcode_length": 16,
+  "umi_length": 12,
+  "population_rates": {
+    "eGFP": 0.05,
+    "mRuby3": 0.2
+  },
+  "population_cells": 24,
+  "expected": [
+    {
+      "CBC": "AAAAAAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 40,
+      "Neg": 4,
+      "Rep_Index": 0.09090909090909091,
+      "Neg_PosRatio": 0.0975609756097561
+    },
+    {
+      "CBC": "AAAAAAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 10,
+      "Neg": 5,
+      "Rep_Index": 0.3333333333333333,
+      "Neg_PosRatio": 0.45454545454545453
+    },
+    {
+      "CBC": "AAAAAAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 30,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "BBBBBBBBBBBBBAAA",
+      "ref_name": "eGFP",
+      "Pos": 20,
+      "Neg": 1,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.047619047619047616
+    },
+    {
+      "CBC": "BBBBBBBBBBBBBAAA",
+      "ref_name": "HostControl",
+      "Pos": 25,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "CCCCCCCCCCCCCAAA",
+      "ref_name": "mRuby3",
+      "Pos": 8,
+      "Neg": 2,
+      "Rep_Index": 0.2,
+      "Neg_PosRatio": 0.2222222222222222
+    },
+    {
+      "CBC": "P000AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 60,
+      "Neg": 3,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04918032786885246
+    },
+    {
+      "CBC": "P000AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 60,
+      "Neg": 12,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19672131147540983
+    },
+    {
+      "CBC": "P000AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P001AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 80,
+      "Neg": 4,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04938271604938271
+    },
+    {
+      "CBC": "P001AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 80,
+      "Neg": 16,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19753086419753085
+    },
+    {
+      "CBC": "P001AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P002AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 100,
+      "Neg": 5,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04950495049504951
+    },
+    {
+      "CBC": "P002AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 100,
+      "Neg": 20,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19801980198019803
+    },
+    {
+      "CBC": "P002AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P003AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 120,
+      "Neg": 6,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.049586776859504134
+    },
+    {
+      "CBC": "P003AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 120,
+      "Neg": 24,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19834710743801653
+    },
+    {
+      "CBC": "P003AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P004AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 140,
+      "Neg": 7,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04964539007092199
+    },
+    {
+      "CBC": "P004AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 140,
+      "Neg": 28,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19858156028368795
+    },
+    {
+      "CBC": "P004AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P005AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 160,
+      "Neg": 8,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.049689440993788817
+    },
+    {
+      "CBC": "P005AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 160,
+      "Neg": 32,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19875776397515527
+    },
+    {
+      "CBC": "P005AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P006AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 180,
+      "Neg": 9,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.049723756906077346
+    },
+    {
+      "CBC": "P006AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 180,
+      "Neg": 36,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19889502762430938
+    },
+    {
+      "CBC": "P006AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P007AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 200,
+      "Neg": 10,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04975124378109453
+    },
+    {
+      "CBC": "P007AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 200,
+      "Neg": 40,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19900497512437812
+    },
+    {
+      "CBC": "P007AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P008AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 220,
+      "Neg": 11,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.049773755656108594
+    },
+    {
+      "CBC": "P008AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 220,
+      "Neg": 44,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19909502262443438
+    },
+    {
+      "CBC": "P008AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P009AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 240,
+      "Neg": 12,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04979253112033195
+    },
+    {
+      "CBC": "P009AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 240,
+      "Neg": 48,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.1991701244813278
+    },
+    {
+      "CBC": "P009AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P010AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 260,
+      "Neg": 13,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04980842911877394
+    },
+    {
+      "CBC": "P010AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 260,
+      "Neg": 52,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19923371647509577
+    },
+    {
+      "CBC": "P010AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P011AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 280,
+      "Neg": 14,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.0498220640569395
+    },
+    {
+      "CBC": "P011AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 280,
+      "Neg": 56,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.199288256227758
+    },
+    {
+      "CBC": "P011AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P012AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 300,
+      "Neg": 15,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04983388704318937
+    },
+    {
+      "CBC": "P012AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 300,
+      "Neg": 60,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19933554817275748
+    },
+    {
+      "CBC": "P012AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P013AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 320,
+      "Neg": 16,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04984423676012461
+    },
+    {
+      "CBC": "P013AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 320,
+      "Neg": 64,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19937694704049844
+    },
+    {
+      "CBC": "P013AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P014AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 340,
+      "Neg": 17,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04985337243401759
+    },
+    {
+      "CBC": "P014AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 340,
+      "Neg": 68,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19941348973607037
+    },
+    {
+      "CBC": "P014AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P015AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 360,
+      "Neg": 18,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04986149584487535
+    },
+    {
+      "CBC": "P015AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 360,
+      "Neg": 72,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.1994459833795014
+    },
+    {
+      "CBC": "P015AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P016AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 380,
+      "Neg": 19,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.049868766404199474
+    },
+    {
+      "CBC": "P016AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 380,
+      "Neg": 76,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.1994750656167979
+    },
+    {
+      "CBC": "P016AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P017AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 400,
+      "Neg": 20,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04987531172069826
+    },
+    {
+      "CBC": "P017AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 400,
+      "Neg": 80,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19950124688279303
+    },
+    {
+      "CBC": "P017AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P018AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 420,
+      "Neg": 21,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.0498812351543943
+    },
+    {
+      "CBC": "P018AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 420,
+      "Neg": 84,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.1995249406175772
+    },
+    {
+      "CBC": "P018AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P019AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 440,
+      "Neg": 22,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.049886621315192746
+    },
+    {
+      "CBC": "P019AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 440,
+      "Neg": 88,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19954648526077098
+    },
+    {
+      "CBC": "P019AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P020AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 460,
+      "Neg": 23,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.049891540130151846
+    },
+    {
+      "CBC": "P020AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 460,
+      "Neg": 92,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19956616052060738
+    },
+    {
+      "CBC": "P020AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P021AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 480,
+      "Neg": 24,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.0498960498960499
+    },
+    {
+      "CBC": "P021AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 480,
+      "Neg": 96,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.1995841995841996
+    },
+    {
+      "CBC": "P021AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P022AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 500,
+      "Neg": 25,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.0499001996007984
+    },
+    {
+      "CBC": "P022AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 500,
+      "Neg": 100,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.1996007984031936
+    },
+    {
+      "CBC": "P022AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    },
+    {
+      "CBC": "P023AAAAAAAAAAAA",
+      "ref_name": "eGFP",
+      "Pos": 520,
+      "Neg": 26,
+      "Rep_Index": 0.047619047619047616,
+      "Neg_PosRatio": 0.04990403071017274
+    },
+    {
+      "CBC": "P023AAAAAAAAAAAA",
+      "ref_name": "mRuby3",
+      "Pos": 520,
+      "Neg": 104,
+      "Rep_Index": 0.16666666666666666,
+      "Neg_PosRatio": 0.19961612284069097
+    },
+    {
+      "CBC": "P023AAAAAAAAAAAA",
+      "ref_name": "HostControl",
+      "Pos": 40,
+      "Neg": 0,
+      "Rep_Index": 0.0,
+      "Neg_PosRatio": 0.0
+    }
+  ]
+}

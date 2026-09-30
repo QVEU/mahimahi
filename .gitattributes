@@ -1,0 +1,28 @@
+# Binary fixtures must not go through git's text/EOL heuristics.
+#
+# This repository commits gzipped FASTQs, a BAM and Matrix Market files as
+# example data (tests/workflow/fixtures/, tests/seurat/). Without explicit
+# binary markers, a checkout with autocrlf enabled -- or any `* text=auto`
+# inherited from a global config, which is what QVEU/mahimahi ships -- can
+# rewrite line endings inside compressed data and corrupt it.
+*.gz      binary
+*.bam     binary
+*.bai     binary
+*.cram    binary
+*.mtx     binary
+*.rds     binary
+*.h5      binary
+*.pdf     binary
+
+# Keep scripts LF regardless of platform: a CRLF shebang line makes the
+# interpreter path unresolvable, which is the same class of failure as the
+# `#!/bin/bash/` typo these scripts started with.
+*.sh      text eol=lf
+*.py       text eol=lf
+*.R        text eol=lf
+*.Rmd      text eol=lf
+*.smk      text eol=lf
+Snakefile  text eol=lf
+*.yaml     text eol=lf
+*.yml      text eol=lf
+*.tsv      text eol=lf
