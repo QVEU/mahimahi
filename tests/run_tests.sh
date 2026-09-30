@@ -20,7 +20,15 @@ set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
 USE_STUBS=0
-[[ "${1:-}" == "--stubs" ]] && USE_STUBS=1
+REQUIRE_DEPS=0
+for arg in "$@"; do
+    case "$arg" in
+        --stubs)        USE_STUBS=1 ;;
+        --require-deps) REQUIRE_DEPS=1 ;;
+        *) echo "unknown option: $arg" >&2
+           echo "usage: $0 [--stubs] [--require-deps]" >&2; exit 2 ;;
+    esac
+done
 
 if [[ "${USE_STUBS}" -eq 1 ]]; then
     STUB_LIB="$(mktemp -d)"
@@ -61,7 +69,11 @@ if [[ "${USE_STUBS}" -eq 1 ]]; then
     echo "  These analyses must run against the real package. Re-run without"
     echo "  --stubs, or: bash tests/seurat/run_seurat_smoke.sh"
 else
-    run "Seurat analyses end-to-end" bash tests/seurat/run_seurat_smoke.sh
+    if [[ "${REQUIRE_DEPS}" -eq 1 ]]; then
+        run "Seurat analyses end-to-end" bash tests/seurat/run_seurat_smoke.sh --require-deps
+    else
+        run "Seurat analyses end-to-end" bash tests/seurat/run_seurat_smoke.sh
+    fi
 fi
 
 echo ""

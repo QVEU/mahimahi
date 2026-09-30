@@ -15,6 +15,17 @@
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
 
+REGENERATE=0
+REQUIRE_DEPS=0
+for arg in "$@"; do
+    case "$arg" in
+        --regenerate)   REGENERATE=1 ;;
+        --require-deps) REQUIRE_DEPS=1 ;;
+        *) echo "unknown option: $arg" >&2
+           echo "usage: $0 [--regenerate] [--require-deps]" >&2; exit 2 ;;
+    esac
+done
+
 # ---------------------------------------------------------------------------
 # Dependency check
 #
@@ -78,7 +89,11 @@ else
 fi
 
 if [[ ${#missing_tools[@]} -gt 0 || ${#missing_modules[@]} -gt 0 ]]; then
-    echo "SKIP: cannot run the workflow tests." >&2
+    if [[ "${REQUIRE_DEPS}" -eq 1 ]]; then
+        echo "FAIL: dependencies missing and --require-deps was given." >&2
+    else
+        echo "SKIP: cannot run the workflow tests." >&2
+    fi
     [[ ${#missing_tools[@]} -gt 0 ]] &&         echo "  not on PATH:        ${missing_tools[*]}" >&2
     [[ ${#missing_modules[@]} -gt 0 ]] &&         echo "  not importable:     ${missing_modules[*]}" >&2
     echo >&2
@@ -91,6 +106,9 @@ if [[ ${#missing_tools[@]} -gt 0 || ${#missing_modules[@]} -gt 0 ]]; then
         python3 -c "import ${missing_modules[0]}" 2>&1 | sed 's/^/    /' >&2
     fi
     suggest_conda_env
+    # A silently skipped suite is worse than a red one in CI, where nobody is
+    # watching the output.
+    [[ "${REQUIRE_DEPS}" -eq 1 ]] && exit 1
     exit 0
 fi
 
@@ -110,7 +128,7 @@ step "1. Example data"
 # The fixtures are committed, so a fresh clone can run this immediately. Verify
 # they still match the generator rather than trusting that they do; regenerate
 # only when asked.
-if [[ "${1:-}" == "--regenerate" ]]; then
+if [[ "${REGENERATE}" -eq 1 ]]; then
     python3 tests/workflow/make_fixtures.py || { echo "FAILED: generation"; exit 1; }
 else
     python3 tests/workflow/make_fixtures.py --check \

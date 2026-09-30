@@ -1,5 +1,7 @@
 # SCISSORS
 
+[![tests](https://github.com/QVEU/SCISSORS-pipeline/actions/workflows/tests.yml/badge.svg)](https://github.com/QVEU/SCISSORS-pipeline/actions/workflows/tests.yml)
+
 **S**ingle **C**ell **I**solated **S**trand **S**pecific **O**bservation of
 **R**eplication **S**tate
 
@@ -36,14 +38,20 @@ Snakemake workflow has no cluster dependency.
 
 ## Check your install
 
-No data of your own needed. This generates synthetic reads with known
-per-cell, per-template, per-strand UMI counts, runs the workflow over all
-three supported input types, and checks every value against that truth:
+No data of your own needed. Example data is **committed** in
+`tests/workflow/fixtures/` (3.3 MB), with known per-cell, per-template,
+per-strand UMI counts. This runs the workflow over all three supported input
+types and checks every value against that truth:
 
 ```bash
-bash tests/workflow/run_workflow_tests.sh     # needs snakemake, pysam, pandas, minimap2, samtools
-bash tests/run_tests.sh                       # R and shell unit tests
+bash tests/workflow/run_workflow_tests.sh     # strand-counting workflow, end to end
+bash tests/run_tests.sh                       # R unit tests + the Seurat analyses
 ```
+
+`tests/run_tests.sh` runs the Seurat analyses for real against the committed
+fixtures, including knitting both QC notebooks. Add `--stubs` to skip anything
+needing the real Seurat, or `--require-deps` to turn a missing dependency into
+a failure rather than a skip (which is what CI uses).
 
 Expected tail:
 
@@ -177,7 +185,11 @@ package:**
 | `config/config.yaml` | Workflow configuration: reference, barcode layout, strand convention, filters. |
 | `config/samples.tsv` | Workflow sample sheet: one row per sample; input may be FASTQ or SAM/BAM/CRAM. |
 | `tests/` | Offline regression tests for the correctness fixes. |
-| `tests/workflow/` | End-to-end workflow tests against synthetic ground truth. |
+| `tests/workflow/` | End-to-end workflow tests; `fixtures/` is the committed example data. |
+| `tests/seurat/` | Smoke test that actually runs the Seurat analyses. |
+| `legacy/` | The original notebooks, kept for provenance. Do not run. |
+| `LICENSE` | CC0 / US Government work (17 USC 105). |
+| `CITATION.cff` | Citation metadata. |
 
 ## Host response: Cell Ranger + Seurat
 
@@ -268,18 +280,36 @@ overridable with `SCISSORS_PROJECT_ROOT` and `SCISSORS_REF_BUILD_DIR`.
 
 ### Environment
 
-The R analyses target **Seurat v4** and check this at startup. They will not
-run unchanged on v5, where layers change `merge()` and RNA assay behaviour.
+Everything — Python and R — comes from one conda environment:
 
-```r
-remotes::install_version("SeuratObject", "4.1.4",
-  repos = c("https://satijalab.r-universe.dev", getOption("repos")))
-remotes::install_version("Seurat", "4.4.0",
-  repos = c("https://satijalab.r-universe.dev", getOption("repos")))
-install.packages(c("clustree", "tidyverse", "ggrepel", "mixtools", "rprojroot"))
+```bash
+conda env create -f workflow/envs/scissors.yaml
+conda activate scissors
 ```
 
-Cluster modules: `cellranger/7.2.0-dntehee`, `bcl2fastq2/2.20.0.422-orocbiu`.
+The R analyses target **Seurat v5** and assert it at startup. They were
+originally written against 4.4.0, which is archived on CRAN; `NEWS.md` records
+what the port changed and why results may differ from the v4 run. The doublet
+step uses `scanpy.pp.scrublet` rather than the standalone `scrublet` package,
+which has been unmaintained at 0.2.3 for years.
+
+Two things worth knowing about the environment:
+
+- **Install the R side from conda, not apt.** Ubuntu's `r-cran-*` packages lag
+  considerably (R 4.3.3, ggplot2 3.4.4, data.table 1.14.10 at the time of
+  writing), which defeats the version floors.
+- **`scikit-image` is required but is not a hard dependency of scanpy.**
+  `scanpy.pp.scrublet` needs it to choose the doublet-score threshold
+  automatically, so a bare `pip install scanpy` fails at that call.
+  `scripts/04_scrublet.py` checks for it up front.
+
+Cluster modules for the Cell Ranger stages are set in `config.sh`. The
+`cellranger count` interface changed in 8.0 — `--create-bam` became mandatory
+and is rejected by 7.x — so the flag is derived from `cellranger --version`
+rather than hardcoded, and an unparseable version is an error rather than a
+guess. `bcl2fastq2` is end-of-life at Illumina; see the note in
+`scripts/01_mkfastq.sh` before moving to `bcl-convert`, since the
+demultiplexer determines the read-name layout the barcode parser depends on.
 
 ## The strand-specific counting workflow
 
@@ -654,12 +684,25 @@ chunk, and the two correctness fixes — including a regression test that
 reproduces the dropped-cell scenario and asserts the barcode join gives the
 right answer where the positional join gave the wrong one.
 
-The R tests need `Seurat` and `mixtools` loadable. On a machine with no package
-access, `bash tests/run_tests.sh --stubs` installs the minimal stand-ins in
-`tests/stubs/` into a throwaway library. Those stubs reproduce only the two
-behaviours under test — `AddMetaData`'s named-vs-unnamed vector contract, and
-`normalmixEM` returning components in arbitrary order. Prefer the real packages
-where available.
+`tests/run_tests.sh` also runs the Seurat analyses for real —
+`analysis/PV_mutants_integrated.R` plus both QC notebooks — against a synthetic
+10x share layout built by `tests/seurat/make_seurat_fixtures.R`. That fixture
+generator derives its gene universe and count magnitudes from the same
+definitions the analysis uses (Seurat's `cc.genes`, and `MARKER_PANEL` /
+`PV_QC_THRESHOLDS` from `analysis/config.R`) and asserts every sample clears
+its real QC thresholds, so the test exercises the shipped config rather than a
+relaxed copy.
+
+That smoke test is what found the three bugs the parse check could not: Seurat
+5's changed `PercentageFeatureSet` return type, and two zero-row
+`FindAllMarkers` crashes. It is worth running after any Seurat upgrade.
+
+`--stubs` installs the minimal stand-ins in `tests/stubs/` into a throwaway
+library for machines with no package access. They reproduce only the behaviours
+under test — `AddMetaData`'s named-vs-unnamed vector contract, `normalmixEM`
+returning components in arbitrary order, and `PercentageFeatureSet`'s v5 vector
+return. The Seurat stage is skipped under `--stubs`, since the stub would mask
+the real package. Prefer the real packages.
 
 ## Data locations
 

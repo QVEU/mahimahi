@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: "SCISSORS: Single Cell Isolated Strand Specific Observation of Replication State"
+message: "If you use this software, please cite it as below."
+type: software
+abstract: >-
+  A single-cell RNA-seq pipeline that simultaneously quantifies enterovirus
+  replication and the host transcriptional response in the same cells. Reads are
+  counted against a reference carrying the viral genome and reporter cassettes,
+  and positive- and negative-strand UMIs are tallied per cell and per template.
+  Because the negative strand is the replication intermediate of a
+  positive-strand RNA virus, the (-)/(+) ratio measures replication rather than
+  viral load, and per-template counting resolves co-infecting genomes within a
+  single cell.
+authors:
+  - family-names: Dolan
+    given-names: Patrick T.
+    affiliation: >-
+      Quantitative Virology and Evolution Unit, Laboratory of Viral Diseases,
+      National Institute of Allergy and Infectious Diseases, National
+      Institutes of Health
+  - family-names: Mariskanish
+    given-names: Christine
+    affiliation: >-
+      Quantitative Virology and Evolution Unit, Laboratory of Viral Diseases,
+      National Institute of Allergy and Infectious Diseases, National
+      Institutes of Health
+# TODO: add ORCIDs and a DOI before citing this externally. Deliberately
+# omitted rather than guessed -- an ORCID is a real identifier and a wrong one
+# misattributes the work.
+repository-code: "https://github.com/QVEU/SCISSORS-pipeline"
+license: CC0-1.0
+keywords:
+  - single-cell RNA-seq
+  - enterovirus
+  - poliovirus
+  - virus replication
+  - strand-specific sequencing
+  - coxsackievirus B3
+  - enterovirus A71

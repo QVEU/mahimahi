@@ -1,0 +1,99 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel a superseded run on the same branch rather than paying for both.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The strand-counting workflow: minimap2, samtools, snakemake, pysam, pandas.
+  # Runs against the committed fixtures in tests/workflow/fixtures/, so there
+  # is no generation step and no network beyond installing the environment.
+  workflow:
+    name: strand-counting workflow
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash -el {0}          # -l so the conda env is on PATH
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: workflow/envs/scissors.yaml
+          environment-name: scissors
+          cache-environment: true
+
+      - name: Record versions
+        run: |
+          python3 -c 'import sys, pysam, pandas; print("python", sys.version.split()[0]); print("pysam", pysam.__version__); print("pandas", pandas.__version__)'
+          snakemake --version
+          minimap2 --version
+          samtools --version | head -1
+
+      - name: Committed fixtures match the generator
+        run: python3 tests/workflow/make_fixtures.py --check
+
+      - name: Workflow tests
+        # --require-deps turns a missing dependency into a failure. A silently
+        # skipped suite is worse than a red one where nobody is watching.
+        run: bash tests/workflow/run_workflow_tests.sh --require-deps
+
+  # The R analyses. Kept a separate job because the R side of the environment
+  # dominates install time and its failures are unrelated to the workflow's.
+  #
+  # Installed from conda-forge, NOT apt: Ubuntu's r-cran-* packages lag
+  # considerably (R 4.3.3, ggplot2 3.4.4, data.table 1.14.10), which would
+  # defeat the point of testing against current versions.
+  analyses:
+    name: R analyses and Seurat smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: workflow/envs/scissors.yaml
+          environment-name: scissors
+          cache-environment: true
+
+      - name: Record versions
+        run: |
+          Rscript -e 'for (p in c("Seurat","SeuratObject","Matrix","mixtools","ggplot2","data.table","rmarkdown")) cat(sprintf("%-14s %s\n", p, as.character(packageVersion(p))))'
+          Rscript -e 'cat("R", as.character(getRversion()), "\n")'
+          python3 -c 'import scanpy, skimage; print("scanpy", scanpy.__version__); print("scikit-image", skimage.__version__)'
+
+      - name: Seurat version floor
+        # The analyses require v5: merge() is layer-aware there and v4 is
+        # archived on CRAN. Fail early and explicitly rather than inside a
+        # stopifnot 40 lines into an analysis.
+        run: Rscript -e 'stopifnot(packageVersion("Seurat") >= "5.0.0"); cat("Seurat", as.character(packageVersion("Seurat")), "OK\n")'
+
+      - name: R unit tests, Seurat smoke test and notebook renders
+        # No --stubs: this runs against the real Seurat, mixtools and scanpy,
+        # which is the only way the v4/v5 return-type differences show up.
+        run: bash tests/run_tests.sh --require-deps
+
+      - name: Upload rendered notebooks on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-renders
+          path: |
+            /tmp/*.log
+            **/*.html
+          if-no-files-found: ignore
+          retention-days: 7
