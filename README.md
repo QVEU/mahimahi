@@ -365,6 +365,9 @@ snakemake --cores 8 -n                 # dry run: show the plan
 snakemake --cores 8 --software-deployment-method conda   # managed deps
 ```
 
+[docs/REAL_DATA.md](docs/REAL_DATA.md) lists what a run on the real samples
+needs: inputs, template FASTA, sense control, chemistry and whitelists.
+
 `config/samples.tsv` needs `sample` and `input` per row. The input's extension
 decides the route: a FASTQ gets aligned against `template`, a SAM/BAM/CRAM is
 used as-is. Optional columns are `mate_fastq` (the R1 barcode read),

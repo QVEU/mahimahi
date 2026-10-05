@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check workflow output against the fixture ground truth."""
-import json, sys, os
+import json, sys, os, shutil
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -57,7 +57,17 @@ for sample in sorted(merged["sample"].unique()):
 # reads were built from?
 print("=== END-TO-END: fitted slope vs the rate the reads were generated at ===")
 rates = truth.get("population_rates", {})
-if rates:
+if rates and shutil.which("Rscript") is None:
+    # The counts above are the workflow's own output and are fully checked
+    # without R. This last check runs the R analysis on them, so it needs
+    # Rscript; skip it like the runner skips missing tools, unless the caller
+    # asked for missing dependencies to be failures.
+    if os.environ.get("SCISSORS_REQUIRE_DEPS") == "1":
+        failures.append("Rscript not on PATH; cannot run the slope check")
+    else:
+        print("  SKIP: Rscript not on PATH, so analysis/scissors_replication.R")
+        print("  cannot be run. Install the R side of workflow/envs/scissors.yaml.")
+elif rates:
     import subprocess, tempfile, csv
     figdir = tempfile.mkdtemp(prefix="scissors_fit_")
     proc = subprocess.run(

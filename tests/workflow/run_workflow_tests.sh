@@ -151,7 +151,7 @@ else
 fi
 
 step "5. Verify counts against ground truth"
-python3 tests/workflow/verify_against_truth.py || failures=$((failures+1))
+SCISSORS_REQUIRE_DEPS="${REQUIRE_DEPS}" python3 tests/workflow/verify_against_truth.py || failures=$((failures+1))
 
 step "6. Confirm an inverted strand convention is rejected"
 sed -e 's/convention: "reverse_is_positive"/convention: "forward_is_positive"/' \
