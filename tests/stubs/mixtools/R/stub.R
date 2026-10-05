@@ -1,6 +1,6 @@
 # Fits a 2-component normal mixture by a crude EM, then DELIBERATELY returns
 # the components in an arbitrary order determined by the RNG -- mirroring the
-# behaviour of real normalmixEM that the SCISSORS ordering fix guards against.
+# behaviour of real normalmixEM that the mahimahi ordering fix guards against.
 normalmixEM <- function(x, k = 2, ...) {
   q <- stats::quantile(x, c(0.25, 0.75))
   mu <- as.numeric(q); sigma <- rep(stats::sd(x) / 2, 2); lambda <- c(0.5, 0.5)

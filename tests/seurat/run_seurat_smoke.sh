@@ -48,7 +48,7 @@ cat(paste(absent, collapse = " "))' 2>/dev/null)
 if [[ -n "$missing" ]]; then
     skip_or_fail "SKIP: R packages not installed: $missing
   The analyses need Seurat 5. Install the environment with:
-      conda env create -f workflow/envs/scissors.yaml && conda activate scissors"
+      conda env create -f workflow/envs/mahimahi.yaml && conda activate mahimahi"
 fi
 
 seurat_major=$(Rscript -e 'cat(as.integer(packageVersion("Seurat")[1,1]))' 2>/dev/null)
@@ -68,19 +68,19 @@ echo "  pandoc         $(pandoc --version | head -1 | awk '{print $2}')"
 ROOT=$(mktemp -d)
 
 # Logs and rendered notebooks go in OUTDIR. CI overrides it via
-# SCISSORS_SMOKE_OUTDIR so its upload-artifact step has something to find:
+# MAHIMAHI_SMOKE_OUTDIR so its upload-artifact step has something to find:
 # with a mktemp dir the trap below deletes everything before the upload runs,
 # which is why the first CI failure uploaded nothing
 # ("No files were found with the provided path").
-if [ -n "${SCISSORS_SMOKE_OUTDIR:-}" ]; then
-    OUTDIR="${SCISSORS_SMOKE_OUTDIR}"
+if [ -n "${MAHIMAHI_SMOKE_OUTDIR:-}" ]; then
+    OUTDIR="${MAHIMAHI_SMOKE_OUTDIR}"
     mkdir -p "$OUTDIR"
     trap 'rm -rf "$ROOT"' EXIT          # keep OUTDIR for the caller
 else
     OUTDIR=$(mktemp -d)
     trap 'rm -rf "$ROOT" "$OUTDIR"' EXIT
 fi
-export SCISSORS_SHARE_ROOT="$ROOT"
+export MAHIMAHI_SHARE_ROOT="$ROOT"
 
 REPO=$PWD
 failures=0
@@ -99,14 +99,14 @@ CR="$ROOT/Projects/PTD_StrandSpecificCounting_scRNAseq/CellRanger"
 RES="$ROOT/Projects/CM_kb"
 
 step "2. Run analysis/PV_mutants_integrated.R (3 of 14 samples)"
-export SCISSORS_PV_SAMPLE_IDS="Mock_5h_PV,WT_GFP_PV,RFP_C109S_PV"
+export MAHIMAHI_PV_SAMPLE_IDS="Mock_5h_PV,WT_GFP_PV,RFP_C109S_PV"
 ( cd "$ROOT" && Rscript "$REPO/analysis/PV_mutants_integrated.R" ) \
     > "$OUTDIR/pv.log" 2>&1
 pv_status=$?
 check "exits 0" "$pv_status"
 [[ "$pv_status" -ne 0 ]] && tail -20 "$OUTDIR/pv.log"
 
-for f in mutsFinal.rds scissors.metadata0.5.csv markers.0.5.csv; do
+for f in mutsFinal.rds mahimahi.metadata0.5.csv markers.0.5.csv; do
     [[ -s "$CR/$f" ]]; check "wrote $f" $?
 done
 
@@ -114,7 +114,7 @@ step "3. Check the integrated results are sane"
 export CR_DIR="$CR"
 Rscript -e '
 cr <- Sys.getenv("CR_DIR")
-md <- read.csv(file.path(cr, "scissors.metadata0.5.csv"), row.names = 1)
+md <- read.csv(file.path(cr, "mahimahi.metadata0.5.csv"), row.names = 1)
 mk <- read.csv(file.path(cr, "markers.0.5.csv"))
 fail <- 0
 say <- function(ok, msg) { cat(if (ok) "  PASS  " else "  FAIL  ", msg, "\n", sep="")

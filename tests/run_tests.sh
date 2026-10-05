@@ -1,5 +1,5 @@
 #!/bin/bash
-# Offline regression tests for the SCISSORS pipeline.
+# Offline regression tests for the mahimahi pipeline.
 #
 #   bash tests/run_tests.sh
 #
@@ -55,7 +55,7 @@ run() {
 run "Slurm memory derivation (config.sh)" bash tests/test_config_memory.sh
 run "Shell script syntax" bash -c 'for f in config.sh scripts/*.sh; do bash -n "$f" || exit 1; echo "$f OK"; done'
 run "Python script syntax" python3 -c 'import ast; ast.parse(open("scripts/04_scrublet.py").read()); print("04_scrublet.py OK")'
-run "R script parsing" Rscript -e 'for (f in c("analysis/config.R","analysis/helpers.R","analysis/PV_mutants_integrated.R","analysis/replication.R","analysis/scissors_replication.R")) { invisible(parse(f)); cat(f,"OK\n") }'
+run "R script parsing" Rscript -e 'for (f in c("analysis/config.R","analysis/helpers.R","analysis/PV_mutants_integrated.R","analysis/replication.R","analysis/mahimahi_replication.R")) { invisible(parse(f)); cat(f,"OK\n") }'
 run "R Markdown chunk parsing" Rscript tests/check_rmd_parses.R analysis/CVB3_QC.Rmd analysis/EVA71_QC.Rmd
 run "Doublet score joining (helpers.R)" Rscript tests/test_doublet_join.R
 run "Infected status calling (helpers.R)" Rscript tests/test_infected_status.R

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=scissors_aggr
+#SBATCH --job-name=mahimahi_aggr
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=100G
 #SBATCH --time=12:00:00

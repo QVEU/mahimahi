@@ -1,15 +1,15 @@
 #!/bin/bash
-# Shared paths and Slurm helpers for the SCISSORS pipeline.
+# Shared paths and Slurm helpers for the mahimahi pipeline.
 # Sourced by every script in scripts/. Edit here, not in the scripts.
 
 # ---------------------------------------------------------------------------
 # Locations on the Skyline cluster
 # ---------------------------------------------------------------------------
-PROJECT_ROOT="${SCISSORS_PROJECT_ROOT:-/data/lvd_qve/Projects/PTD_StrandSpecificCounting_scRNAseq}"
+PROJECT_ROOT="${MAHIMAHI_PROJECT_ROOT:-/data/lvd_qve/Projects/PTD_StrandSpecificCounting_scRNAseq}"
 CELLRANGER_DIR="${PROJECT_ROOT}/CellRanger"
 
 # Directory holding the custom reference FASTA/GTF, and the mkref output name.
-REF_BUILD_DIR="${SCISSORS_REF_BUILD_DIR:-/data/lvd_qve/QVEU_Code/sequencing/template_fastas/refdata-gex-GRCh38-2020-A_PV_GFP_mRuby}"
+REF_BUILD_DIR="${MAHIMAHI_REF_BUILD_DIR:-/data/lvd_qve/QVEU_Code/sequencing/template_fastas/refdata-gex-GRCh38-2020-A_PV_GFP_mRuby}"
 REF_GENOME_NAME="GRCh38-2020-A_PV_GTF_mRuby"
 REF_FASTA="human_pv_mrubygfp.fa"
 REF_GTF="genomePVmrubygtf.gtf"

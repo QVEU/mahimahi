@@ -6,7 +6,7 @@ import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 truth = json.load(open(os.path.join(HERE, "fixtures", "expected.json")))
 expected = pd.DataFrame(truth["expected"])
-merged = pd.read_table(os.path.join(HERE, "results", "scissors_counts.tsv.gz"))
+merged = pd.read_table(os.path.join(HERE, "results", "mahimahi_counts.tsv.gz"))
 
 print(f"reads per distinct UMI in fixtures: {truth['reads_per_umi']}")
 print("(so any pipeline counting READS instead of UMIs reports 3x these numbers)\n")
@@ -62,22 +62,22 @@ if rates and shutil.which("Rscript") is None:
     # without R. This last check runs the R analysis on them, so it needs
     # Rscript; skip it like the runner skips missing tools, unless the caller
     # asked for missing dependencies to be failures.
-    if os.environ.get("SCISSORS_REQUIRE_DEPS") == "1":
+    if os.environ.get("MAHIMAHI_REQUIRE_DEPS") == "1":
         failures.append("Rscript not on PATH; cannot run the slope check")
     else:
-        print("  SKIP: Rscript not on PATH, so analysis/scissors_replication.R")
-        print("  cannot be run. Install the R side of workflow/envs/scissors.yaml.")
+        print("  SKIP: Rscript not on PATH, so analysis/mahimahi_replication.R")
+        print("  cannot be run. Install the R side of workflow/envs/mahimahi.yaml.")
 elif rates:
     import subprocess, tempfile, csv
-    figdir = tempfile.mkdtemp(prefix="scissors_fit_")
+    figdir = tempfile.mkdtemp(prefix="mahimahi_fit_")
     proc = subprocess.run(
-        ["Rscript", "analysis/scissors_replication.R",
-         f"--counts={os.path.join(HERE, 'results', 'scissors_counts.tsv.gz')}",
+        ["Rscript", "analysis/mahimahi_replication.R",
+         f"--counts={os.path.join(HERE, 'results', 'mahimahi_counts.tsv.gz')}",
          f"--figures={figdir}", "--min-umis=50"],
         capture_output=True, text=True, cwd=os.path.join(HERE, "..", ".."))
     slopes_csv = os.path.join(figdir, "replication_slopes.csv")
     if not os.path.exists(slopes_csv):
-        print("  could not run analysis/scissors_replication.R:")
+        print("  could not run analysis/mahimahi_replication.R:")
         print("  " + (proc.stderr or proc.stdout).strip()[-500:])
         failures.append("analysis script did not produce replication_slopes.csv")
     else:

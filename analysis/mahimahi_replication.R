@@ -1,12 +1,12 @@
 ################################################################################
-### SCISSORS: replication analysis and figures
+### mahimahi: replication analysis and figures
 ###
-### Consumes results/scissors_counts.tsv.gz from the Snakemake workflow and
+### Consumes results/mahimahi_counts.tsv.gz from the Snakemake workflow and
 ### produces the replication-rate figures. Replaces
 ### Scissors_Analysis_v4.ipynb.
 ###
-###   Rscript analysis/scissors_replication.R
-###   Rscript analysis/scissors_replication.R --counts path/to/counts.tsv.gz
+###   Rscript analysis/mahimahi_replication.R
+###   Rscript analysis/mahimahi_replication.R --counts path/to/counts.tsv.gz
 ###
 ### Computation lives in analysis/replication.R so it can be unit-tested
 ### (tests/test_replication_fit.R); this script is the plotting layer.
@@ -45,7 +45,7 @@ get_opt <- function(flag, default) {
   if (length(hit)) sub(paste0("^", flag, "="), "", hit[[1]]) else default
 }
 
-COUNTS_FILE <- get_opt("--counts", "results/scissors_counts.tsv.gz")
+COUNTS_FILE <- get_opt("--counts", "results/mahimahi_counts.tsv.gz")
 FIGURE_DIR  <- get_opt("--figures", "results/figures")
 ## Minimum viral UMIs per cell. The notebook used UMI_count > 100 and the
 ## Python used CBC_readcount > 100 -- two different quantities behind the same

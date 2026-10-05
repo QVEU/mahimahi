@@ -1,7 +1,7 @@
 # Regenerating the strand counts on real data
 
 The strand-counting workflow (`workflow/`) is the route for regenerating
-`results/scissors_counts.tsv.gz`. This page records what has been verified on
+`results/mahimahi_counts.tsv.gz`. This page records what has been verified on
 the committed example data and lists what is still needed to run it on the
 real samples.
 
@@ -18,7 +18,7 @@ conda activate wf
 bash tests/workflow/run_workflow_tests.sh
 ```
 
-(The full `workflow/envs/scissors.yaml` works too; the list above is the
+(The full `workflow/envs/mahimahi.yaml` works too; the list above is the
 subset the workflow and its slope check need, and skips Seurat.)
 
 Result, 2026-10-05, python 3.14.7, pysam 0.24.1, pandas 3.0.6, snakemake
@@ -31,7 +31,7 @@ Result, 2026-10-05, python 3.14.7, pysam 0.24.1, pandas 3.0.6, snakemake
   0.04797–0.05018, true 0.05; mRuby3 0.19849, CI 0.19689–0.20010, true 0.20);
 - an inverted strand convention is rejected by the sense control;
 - a second run is a no-op, and a clean re-run gives a byte-identical
-  decompressed `scissors_counts.tsv.gz`.
+  decompressed `mahimahi_counts.tsv.gz`.
 
 Without `Rscript` on PATH the slope check is skipped (or fails under
 `--require-deps`); the count checks do not need R.
@@ -125,7 +125,7 @@ metadata lossless.
 On Skyline, from the repository root:
 
 ```bash
-conda env create -f workflow/envs/scissors.yaml && conda activate scissors
+conda env create -f workflow/envs/mahimahi.yaml && conda activate mahimahi
 bash tests/workflow/run_workflow_tests.sh          # confirms the install
 snakemake --cores 8 --configfile config/<run>.yaml -n   # check the plan
 snakemake --cores 8 --configfile config/<run>.yaml

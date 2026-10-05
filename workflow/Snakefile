@@ -1,4 +1,4 @@
-# SCISSORS: strand-specific single-cell counting
+# mahimahi: strand-specific single-cell counting
 #
 #   Single Cell Isolated Strand Specific Observation of Replication State
 #   Quantitative Virology and Evolution Unit, NIAID
@@ -37,7 +37,7 @@ RESULTS = config.get("results_dir", "results")
 # Resolve scripts and envs against the Snakefile's own directory so the
 # workflow can be run from anywhere via `snakemake -s /path/to/Snakefile`.
 SCRIPTS = os.path.join(workflow.basedir, "scripts")
-CONDA_ENV = os.path.join(workflow.basedir, "envs", "scissors.yaml")
+CONDA_ENV = os.path.join(workflow.basedir, "envs", "mahimahi.yaml")
 
 
 def _read_samples():
@@ -132,7 +132,7 @@ def sample_field(sample, column, default=""):
 # ---------------------------------------------------------------------------
 # Strand convention
 #
-# Every existing SCISSORS script treated a reverse-mapped read (FLAG 0x10) as
+# Every original script treated a reverse-mapped read (FLAG 0x10) as
 # positive-sense viral RNA. That is the default here. It is a property of the
 # library chemistry, not of the data, so it is configuration -- and
 # rule strand_qc can check it against a sequence of known orientation.
@@ -171,7 +171,7 @@ def barcode_args(sample):
 
 rule all:
     input:
-        f"{RESULTS}/scissors_counts.tsv.gz",
+        f"{RESULTS}/mahimahi_counts.tsv.gz",
         f"{RESULTS}/strand_qc_summary.tsv",
         expand(f"{RESULTS}/{{sample}}/counts_long.tsv.gz", sample=SAMPLE_NAMES),
 
@@ -333,7 +333,7 @@ rule merge_counts:
     input:
         expand(f"{RESULTS}/{{sample}}/counts_wide.tsv.gz", sample=SAMPLE_NAMES),
     output:
-        f"{RESULTS}/scissors_counts.tsv.gz",
+        f"{RESULTS}/mahimahi_counts.tsv.gz",
     params:
         script=os.path.join(SCRIPTS, "merge_samples.py"),
     log:

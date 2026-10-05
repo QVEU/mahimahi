@@ -1,5 +1,5 @@
 ################################################################################
-### SCISSORS: integrated analysis of poliovirus mutants, WT and mock
+### mahimahi: integrated analysis of poliovirus mutants, WT and mock
 ###
 ### Reads the per-sample Cell Ranger matrices from scripts/02_count.sh, calls
 ### infected cells from viral read fraction, applies per-sample QC, merges,
@@ -27,9 +27,9 @@ library(ggrepel)
 ## Package installation is deliberately NOT done here. The pre-restructure
 ## script called remotes::install_version() unconditionally at the top, which
 ## reinstalled Seurat on every source(). Install the environment once, from
-## workflow/envs/scissors.yaml:
+## workflow/envs/mahimahi.yaml:
 ##
-##   conda env create -f workflow/envs/scissors.yaml && conda activate scissors
+##   conda env create -f workflow/envs/mahimahi.yaml && conda activate mahimahi
 ##
 ## This analysis targets Seurat v5. It was originally written against v4.4.0,
 ## which is now archived on CRAN; see NEWS.md for what the port changed and
@@ -38,7 +38,7 @@ stopifnot(packageVersion("Seurat") >= "5.0.0")
 
 ## Locate this script's directory so config.R/helpers.R resolve whether the
 ## file is run with Rscript, sourced, or knitted.
-.scissors_script_dir <- function() {
+.mahimahi_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
   file_arg <- grep("^--file=", args, value = TRUE)
   if (length(file_arg) > 0L) {
@@ -50,7 +50,7 @@ stopifnot(packageVersion("Seurat") >= "5.0.0")
   normalizePath(".")
 }
 
-.script_dir <- .scissors_script_dir()
+.script_dir <- .mahimahi_script_dir()
 source(file.path(.script_dir, "config.R"))
 source(file.path(.script_dir, "helpers.R"))
 
@@ -255,7 +255,7 @@ dir.create(CELLRANGER_DIR, recursive = TRUE, showWarnings = FALSE)
 saveRDS(clustered, file = file.path(CELLRANGER_DIR, "mutsFinal.rds"))
 write.csv(clustered@meta.data,
           file = file.path(CELLRANGER_DIR,
-                           sprintf("scissors.metadata%s.csv", PV_FINAL_RESOLUTION)))
+                           sprintf("mahimahi.metadata%s.csv", PV_FINAL_RESOLUTION)))
 
 ################################################################################
 ### Cluster markers

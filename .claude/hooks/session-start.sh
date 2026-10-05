@@ -3,17 +3,17 @@
 #
 # The cloud container image is plain Ubuntu with system Python and pip -- no
 # conda anywhere. This installs it so the project's own environment
-# (workflow/envs/scissors.yaml) can be built, which is the only way to get the
+# (workflow/envs/mahimahi.yaml) can be built, which is the only way to get the
 # R side at the versions the analyses target: CRAN is blocked by the network
 # policy, and Ubuntu's r-cran-* packages lag far enough to defeat the floors.
 #
 # Deliberately does NOT create the conda environment. That is ~400 packages and
 # roughly 15 minutes, which is too long to sit in front of every session start.
-# Set SCISSORS_CREATE_ENV=1 to opt in; the container state is cached after the
+# Set MAHIMAHI_CREATE_ENV=1 to opt in; the container state is cached after the
 # hook completes, so the cost is paid once rather than per session.
 #
 #   bash .claude/hooks/session-start.sh                  # conda only
-#   SCISSORS_CREATE_ENV=1 bash .claude/hooks/session-start.sh   # + the env
+#   MAHIMAHI_CREATE_ENV=1 bash .claude/hooks/session-start.sh   # + the env
 
 set -euo pipefail
 
@@ -55,7 +55,7 @@ CONDA="${CONDA_ROOT}/bin/conda"
 #
 # Miniconda ships Anaconda's `defaults` channels, and a current conda refuses
 # to solve until their Terms of Service are accepted -- which carry
-# commercial-use restrictions. workflow/envs/scissors.yaml asks for
+# commercial-use restrictions. workflow/envs/mahimahi.yaml asks for
 # conda-forge and bioconda only, so drop defaults rather than accept.
 # ---------------------------------------------------------------------------
 "${CONDA}" config --system --remove-key channels >/dev/null 2>&1 || true
@@ -75,21 +75,21 @@ fi
 # ---------------------------------------------------------------------------
 # 4. The project environment, on request only
 # ---------------------------------------------------------------------------
-ENV_YAML="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/workflow/envs/scissors.yaml"
+ENV_YAML="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/workflow/envs/mahimahi.yaml"
 
-if [ "${SCISSORS_CREATE_ENV:-0}" = "1" ]; then
-    if "${CONDA}" env list | grep -qE '^scissors[[:space:]]'; then
-        log "conda env 'scissors' already exists"
+if [ "${MAHIMAHI_CREATE_ENV:-0}" = "1" ]; then
+    if "${CONDA}" env list | grep -qE '^mahimahi[[:space:]]'; then
+        log "conda env 'mahimahi' already exists"
     elif [ -f "${ENV_YAML}" ]; then
-        log "creating conda env 'scissors' (~400 packages, this takes a while)"
-        "${CONDA}" env create -f "${ENV_YAML}" -n scissors >/dev/null
-        log "created. activate with: conda activate scissors"
+        log "creating conda env 'mahimahi' (~400 packages, this takes a while)"
+        "${CONDA}" env create -f "${ENV_YAML}" -n mahimahi >/dev/null
+        log "created. activate with: conda activate mahimahi"
     else
         log "WARNING ${ENV_YAML} not found; skipping env creation"
     fi
 else
-    log "conda env not created (set SCISSORS_CREATE_ENV=1 to build it). To do it by hand:"
-    log "  conda env create -f workflow/envs/scissors.yaml && conda activate scissors"
+    log "conda env not created (set MAHIMAHI_CREATE_ENV=1 to build it). To do it by hand:"
+    log "  conda env create -f workflow/envs/mahimahi.yaml && conda activate mahimahi"
 fi
 
 log "done"

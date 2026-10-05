@@ -106,7 +106,7 @@ matter and knitr chunks — `Rscript CVB3.r` failed on line 1. Now `.Rmd`.
 `/Volumes/LVD_QVE` (2x — a case difference that breaks on case-sensitive
 volumes), `/data/lvd_qve` (4x), and `~/lab_share` (2x). One script read from
 `~/lab_share` and wrote to `/data/lvd_qve` in the same run. `analysis/config.R`
-resolves the share once, with a `SCISSORS_SHARE_ROOT` override.
+resolves the share once, with a `MAHIMAHI_SHARE_ROOT` override.
 
 **Package installation on every run.** `remotes::install_version()` ran
 unconditionally at the top of the analysis script, reinstalling Seurat on every
@@ -220,7 +220,7 @@ per-strand UMI counts, over all three input routes:
 `bash tests/workflow/run_workflow_tests.sh`.
 
 
-## Added: replication analysis (`analysis/replication.R`, `analysis/scissors_replication.R`)
+## Added: replication analysis (`analysis/replication.R`, `analysis/mahimahi_replication.R`)
 
 Replaces `Scissors_Analysis_v4.ipynb`. Computation is separated from plotting
 so it can be tested (`tests/test_replication_fit.R`, 19 assertions).
@@ -283,5 +283,20 @@ true value inside the 95% CI for all three input routes.
   dropped-cell doublet scenario.
 - `.gitignore`.
 - `workflow/` + `config/` -- the Snakemake strand-counting workflow above.
-- `analysis/replication.R` + `analysis/scissors_replication.R`.
+- `analysis/replication.R` + `analysis/mahimahi_replication.R`.
 - `docs/MIGRATION.md` -- every original script mapped to its replacement.
+
+## Renamed: SCISSORS to mahimahi
+
+The pipeline's own names now say mahimahi. SCISSORS stays as the name of the
+assay, and names that refer to the original scripts or to data on disk are
+unchanged (`81123_SCISSORS_FreshAnalysis/`, `*_CBC_SCISSORS.csv`).
+
+| Before | After |
+|---|---|
+| `workflow/envs/scissors.yaml`, conda env `scissors` | `workflow/envs/mahimahi.yaml`, conda env `mahimahi` |
+| `analysis/scissors_replication.R` | `analysis/mahimahi_replication.R` |
+| `results/scissors_counts.tsv.gz` | `results/mahimahi_counts.tsv.gz` |
+| `scissors.metadata<res>.csv` | `mahimahi.metadata<res>.csv` |
+| `SCISSORS_*` environment variables | `MAHIMAHI_*` (the old names are no longer read) |
+| Slurm job names `scissors_*` | `mahimahi_*` |

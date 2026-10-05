@@ -22,7 +22,7 @@ library(SeuratObject)
 ## notebook -- the pre-restructure version carried install_version() calls in a
 ## chunk, which reinstalled Seurat on every knit:
 ##
-##   conda env create -f workflow/envs/scissors.yaml && conda activate scissors
+##   conda env create -f workflow/envs/mahimahi.yaml && conda activate mahimahi
 ##
 ## Originally written against Seurat 4.4.0, now archived on CRAN. This notebook
 ## builds a single-sample object, so it has one layer and needs no JoinLayers;
