@@ -50,6 +50,10 @@
 # commercial-use restrictions. Avoid it with either Miniforge, or:
 #   conda config --remove channels defaults
 #
+# Apple Silicon: conda-forge has no osx-arm64 build of r-mixtools, so a native
+# solve fails with ResolvePackageNotFound. Build the Intel env (Rosetta 2):
+#   CONDA_SUBDIR=osx-64 conda env create -f workflow/envs/mahimahi.yaml
+#
 # NOTE on apt: Ubuntu's r-cran-* packages are considerably older than
 # conda-forge's (R 4.3.3, ggplot2 3.4.4, data.table 1.14.10 at the time of
 # writing), so installing the R side from apt defeats the point of these
