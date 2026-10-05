@@ -66,8 +66,20 @@ echo "  pandoc         $(pandoc --version | head -1 | awk '{print $2}')"
 
 # ---------------------------------------------------------------------------
 ROOT=$(mktemp -d)
-OUTDIR=$(mktemp -d)
-trap 'rm -rf "$ROOT" "$OUTDIR"' EXIT
+
+# Logs and rendered notebooks go in OUTDIR. CI overrides it via
+# SCISSORS_SMOKE_OUTDIR so its upload-artifact step has something to find:
+# with a mktemp dir the trap below deletes everything before the upload runs,
+# which is why the first CI failure uploaded nothing
+# ("No files were found with the provided path").
+if [ -n "${SCISSORS_SMOKE_OUTDIR:-}" ]; then
+    OUTDIR="${SCISSORS_SMOKE_OUTDIR}"
+    mkdir -p "$OUTDIR"
+    trap 'rm -rf "$ROOT"' EXIT          # keep OUTDIR for the caller
+else
+    OUTDIR=$(mktemp -d)
+    trap 'rm -rf "$ROOT" "$OUTDIR"' EXIT
+fi
 export SCISSORS_SHARE_ROOT="$ROOT"
 
 REPO=$PWD

@@ -190,6 +190,8 @@ package:**
 | `legacy/` | The original notebooks, kept for provenance. Do not run. |
 | `LICENSE` | CC0 / US Government work (17 USC 105). |
 | `CITATION.cff` | Citation metadata. |
+| `.github/workflows/tests.yml` | CI: runs the workflow tests and the Seurat smoke test on every push. |
+| `.claude/hooks/session-start.sh` | Installs conda in Claude Code on the web containers, which ship without it. |
 
 ## Host response: Cell Ranger + Seurat
 

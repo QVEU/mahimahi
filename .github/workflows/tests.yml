@@ -85,15 +85,22 @@ jobs:
       - name: R unit tests, Seurat smoke test and notebook renders
         # No --stubs: this runs against the real Seurat, mixtools and scanpy,
         # which is the only way the v4/v5 return-type differences show up.
+        #
+        # SCISSORS_SMOKE_OUTDIR keeps the smoke test's logs and rendered
+        # notebooks after it finishes, so the upload step below has something
+        # to collect. Without it the test cleans up its own mktemp dir first.
+        env:
+          SCISSORS_SMOKE_OUTDIR: ${{ runner.temp }}/smoke
         run: bash tests/run_tests.sh --require-deps
 
-      - name: Upload rendered notebooks on failure
+      - name: Upload logs and renders on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: failed-renders
-          path: |
-            /tmp/*.log
-            **/*.html
-          if-no-files-found: ignore
+          # Matches SCISSORS_SMOKE_OUTDIR above. The previous globs
+          # (/tmp/*.log, **/*.html) matched nothing, because the smoke test
+          # had already removed its temp directory.
+          path: ${{ runner.temp }}/smoke
+          if-no-files-found: warn
           retention-days: 7
