@@ -20,15 +20,35 @@
 # genuinely does not work: Seurat 5 for the layer-aware merge(), scanpy for a
 # maintained scrublet.
 #
-# Verified against, at the time of writing:
-#   python 3.11.15   pysam 0.24.1    pandas 2.3.3 and 3.0.6   scanpy 1.11.5
-#   scikit-image 0.26.0              snakemake 9.27.0
-#   minimap2 2.26    samtools 1.19.2
-#   R 4.3.3          Seurat 5.0.1    SeuratObject 5.0.1       mixtools 2.0.0
-#   ggplot2 3.4.4    data.table 1.14.10                       rmarkdown 2.25
+# Verified against two stacks, with identical analysis results from both:
 #
-# For an exact reproduction use the companion lockfile:
-#   conda env create -f workflow/envs/scissors.lock.yml
+#   A) what this file resolves to on conda-forge (the CI stack):
+#      python 3.14.7   pysam 0.24.1   pandas 3.0.6   scanpy 1.12.4
+#      scikit-image 0.26.0            numpy 2.5.3    snakemake 9.27.0
+#      minimap2 2.31   samtools 1.24  pandoc 3.12
+#      R 4.5.3   Seurat 5.5.1   SeuratObject 5.4.0   Matrix 1.7.6
+#      ggplot2 4.0.3   data.table 1.18.6.1   mixtools 2.0.0.1
+#      rmarkdown 2.32   clustree 0.5.1   dplyr 1.2.1
+#
+#   B) an older Ubuntu/apt stack, to check the floors are not too high:
+#      python 3.11.15   pandas 2.3.3   R 4.3.3   Seurat 5.0.1
+#      ggplot2 3.4.4    data.table 1.14.10   (no clustree)
+#
+# Both produce the same cell counts, infected calls and marker counts, so the
+# analysis is stable across R 4.3.3 -> 4.5.3, Seurat 5.0.1 -> 5.5.1 and
+# ggplot2 3.4.4 -> 4.0.3.
+#
+# One upstream incompatibility to know about: clustree renders through ggraph,
+# which registers an `edge_colourbar` guide that ggplot2 >= 4.0 REJECTS. With
+# clustree installed and a current ggplot2, that plot call fails. It is wrapped
+# in plot_cluster_tree() (analysis/helpers.R) so it degrades to a warning
+# instead of stopping the analysis.
+#
+# A note on channels: this file requests conda-forge and bioconda only. If your
+# conda also has Anaconda's `defaults` channels configured, recent conda
+# refuses to solve until their Terms of Service are accepted -- and those carry
+# commercial-use restrictions. Avoid it with either Miniforge, or:
+#   conda config --remove channels defaults
 #
 # NOTE on apt: Ubuntu's r-cran-* packages are considerably older than
 # conda-forge's (R 4.3.3, ggplot2 3.4.4, data.table 1.14.10 at the time of

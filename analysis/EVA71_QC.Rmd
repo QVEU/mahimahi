@@ -204,11 +204,7 @@ ElbowPlot(obj)
 obj <- FindNeighbors(obj, dims = 1:20, verbose = FALSE)
 obj <- FindClusters(obj, resolution = seq(0.1, 1, by = 0.05), verbose = FALSE)
 
-if (requireNamespace("clustree", quietly = TRUE)) {
-  print(clustree::clustree(obj))
-} else {
-  message("clustree is not installed; skipping the cluster-stability plot.")
-}
+plot_cluster_tree(obj)
 head(obj[[]])
 ```
 

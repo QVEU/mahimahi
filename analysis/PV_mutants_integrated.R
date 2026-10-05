@@ -203,12 +203,7 @@ merged_seurat <- FindNeighbors(merged_seurat, dims = PV_PCA_DIMS, verbose = FALS
 ################################################################################
 
 clustered <- FindClusters(merged_seurat, resolution = PV_RESOLUTIONS)
-if (requireNamespace("clustree", quietly = TRUE)) {
-  print(clustree::clustree(clustered))
-} else {
-  message("clustree is not installed; skipping the cluster-stability plot. ",
-          "The clustering itself is unaffected.")
-}
+plot_cluster_tree(clustered)
 
 resolution_column <- paste0("RNA_snn_res.", PV_FINAL_RESOLUTION)
 stopifnot(resolution_column %in% colnames(clustered[[]]))

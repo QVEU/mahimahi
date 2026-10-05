@@ -272,3 +272,40 @@ safe_feature_percentage <- function(object, feature) {
   ## package.
   if (is.null(dim(result))) as.numeric(result) else as.numeric(result[, 1])
 }
+
+
+## ---------------------------------------------------------------------------
+## plot_cluster_tree: the clustree diagnostic, which must never stop the run
+##
+## clustree draws a cluster-stability tree across resolutions. It is a
+## diagnostic, not a result, so neither its absence nor a failure inside it
+## should take down an analysis -- and both happen in practice:
+##
+##   - absent: clustree is not packaged for every platform (no apt package,
+##     for instance), so a cluster R may simply not have it.
+##   - present but broken: clustree renders through ggraph, which registers an
+##     `edge_colourbar` guide that ggplot2 >= 4.0 rejects with
+##     "Unknown guide: edge_colourbar". So a CURRENT ggplot2 plus an installed
+##     clustree fails at the plot call -- which is worse than not having it,
+##     because requireNamespace() says it is available.
+##
+## Verified against R 4.5.3 / Seurat 5.5.1 / ggplot2 4.0.3 / clustree 0.5.1.
+## ---------------------------------------------------------------------------
+plot_cluster_tree <- function(object) {
+  if (!requireNamespace("clustree", quietly = TRUE)) {
+    message("clustree is not installed; skipping the cluster-stability plot. ",
+            "The clustering itself is unaffected.")
+    return(invisible(NULL))
+  }
+  tryCatch(
+    print(clustree::clustree(object)),
+    error = function(e) {
+      warning("clustree failed; skipping the cluster-stability plot.\n",
+              "  ", conditionMessage(e), "\n",
+              "  If this is \"Unknown guide: edge_colourbar\", it is an upstream ",
+              "incompatibility between ggraph (which clustree uses) and ",
+              "ggplot2 >= 4.0, not a problem with your data. The clustering ",
+              "itself is unaffected.", call. = FALSE)
+      invisible(NULL)
+    })
+}
