@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=scissors_mkfastq
+#SBATCH --job-name=mahimahi_mkfastq
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00

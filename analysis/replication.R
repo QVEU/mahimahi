@@ -2,7 +2,7 @@
 ##
 ## Pure computation: no plotting, no data.table, no tidyverse, so it can be
 ## unit-tested and used from any script. Figures live in
-## analysis/scissors_replication.R.
+## analysis/mahimahi_replication.R.
 ##
 ## Replaces fitSet() from Scissors_Analysis_v4.ipynb.
 
@@ -36,8 +36,8 @@ check_counts <- function(counts) {
   if (length(missing) > 0) {
     stop("strand count table is missing required column(s): ",
          paste(missing, collapse = ", "),
-         "\nExpected the output of the SCISSORS workflow ",
-         "(results/scissors_counts.tsv.gz).")
+         "\nExpected the output of the mahimahi workflow ",
+         "(results/mahimahi_counts.tsv.gz).")
   }
   invisible(TRUE)
 }
@@ -197,7 +197,7 @@ summarise_rep_index <- function(counts,
                                 exclude_refs = character()) {
   check_counts(counts)
   if (!"Rep_Index" %in% colnames(counts)) {
-    stop("table has no Rep_Index column; expected the SCISSORS workflow output.")
+    stop("table has no Rep_Index column; expected the mahimahi workflow output.")
   }
   if (length(exclude_refs) > 0) {
     counts <- counts[!counts$ref_name %in% exclude_refs, , drop = FALSE]

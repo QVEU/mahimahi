@@ -1,4 +1,4 @@
-## Shared helpers for the SCISSORS R analyses.
+## Shared helpers for the mahimahi R analyses.
 ## Sourced after analysis/config.R.
 
 ## ---------------------------------------------------------------------------

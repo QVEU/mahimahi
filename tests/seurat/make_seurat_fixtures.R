@@ -8,7 +8,7 @@
 ##       filtered_feature_bc_matrix/{matrix.mtx.gz,features.tsv.gz,barcodes.tsv.gz}
 ##       filtered_feature_bc_matrix/<id>_Doublet_scores.tsv
 ##
-## so that SCISSORS_SHARE_ROOT=<root> makes analysis/config.R resolve to it.
+## so that MAHIMAHI_SHARE_ROOT=<root> makes analysis/config.R resolve to it.
 ##
 ## Written in R, not Python, so the gene universe and the count magnitudes are
 ## derived from the SAME definitions the analysis uses -- Seurat's cc.genes,
@@ -35,7 +35,7 @@ if (CELLS_PER_SAMPLE < 60L) {
 set.seed(20260930)
 
 dir.create(ROOT, recursive = TRUE, showWarnings = FALSE)
-Sys.setenv(SCISSORS_SHARE_ROOT = ROOT)
+Sys.setenv(MAHIMAHI_SHARE_ROOT = ROOT)
 
 script_dir <- local({
   a <- commandArgs(trailingOnly = FALSE)
@@ -304,4 +304,4 @@ for (sample_id in SAMPLES) {
 }
 
 cat(sprintf("\nfixtures written under %s\n", CELLRANGER_DIR))
-cat(sprintf("run with: SCISSORS_SHARE_ROOT=%s Rscript analysis/PV_mutants_integrated.R\n", ROOT))
+cat(sprintf("run with: MAHIMAHI_SHARE_ROOT=%s Rscript analysis/PV_mutants_integrated.R\n", ROOT))

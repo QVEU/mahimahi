@@ -1,10 +1,10 @@
 #!/bin/bash
-# End-to-end tests for the SCISSORS Snakemake workflow.
+# End-to-end tests for the mahimahi Snakemake workflow.
 #
 #   bash tests/workflow/run_workflow_tests.sh
 #
 # Needs snakemake, pysam, pandas, minimap2 and samtools on PATH
-# (workflow/envs/scissors.yaml pins them).
+# (workflow/envs/mahimahi.yaml pins them).
 #
 # Generates synthetic reads whose per-cell, per-template, per-strand UMI
 # counts are known exactly, runs the workflow over all three supported input
@@ -56,8 +56,8 @@ suggest_conda_env() {
 
   Recommended: one conda environment with all of it, from the file in this repo.
 
-      conda env create -f workflow/envs/scissors.yaml
-      conda activate scissors
+      conda env create -f workflow/envs/mahimahi.yaml
+      conda activate mahimahi
       bash tests/workflow/run_workflow_tests.sh
 
   Or let Snakemake manage it per rule:
@@ -151,7 +151,7 @@ else
 fi
 
 step "5. Verify counts against ground truth"
-SCISSORS_REQUIRE_DEPS="${REQUIRE_DEPS}" python3 tests/workflow/verify_against_truth.py || failures=$((failures+1))
+MAHIMAHI_REQUIRE_DEPS="${REQUIRE_DEPS}" python3 tests/workflow/verify_against_truth.py || failures=$((failures+1))
 
 step "6. Confirm an inverted strand convention is rejected"
 sed -e 's/convention: "reverse_is_positive"/convention: "forward_is_positive"/' \

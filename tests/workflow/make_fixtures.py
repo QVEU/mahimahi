@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate synthetic SCISSORS inputs with known ground truth.
+"""Generate synthetic mahimahi inputs with known ground truth.
 
 Builds a three-sequence template (two reporters plus a host-style sense
 control) and reads whose per-cell, per-template, per-strand UMI counts are

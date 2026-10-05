@@ -1,4 +1,4 @@
-# SCISSORS sample table, consumed by scripts/02_count.sh
+# mahimahi sample table, consumed by scripts/02_count.sh
 #
 # Columns (tab-separated):
 #   output_id     Cell Ranger --id and output directory name. This is the name

@@ -1,6 +1,6 @@
 # Where the old scripts went
 
-SCISSORS accumulated several implementations of the same steps, which
+mahimahi accumulated several implementations of the same steps, which
 disagreed with each other. This maps every original file to its replacement
 and says why.
 
@@ -21,7 +21,7 @@ October 2026 when this repository took over the mahimahi name. The six notebooks
 | `process_mahimahi-Working020724.ipynb` | `workflow/scripts/tabulate_strands.py` | Adds `ref_name` to the groupby, but still `pivot_table(index="CBC")`, so `Neg`/`Pos`/`Rep_Index`/`Neg_PosRatio` are read-count-weighted averages across templates. |
 | `mahimahi.Rnb.ipynb` | `workflow/scripts/tabulate_strands.py` | The only *correct* tabulation: `dcast(CBC+strand ~ ref_name, fun.aggregate = length(unique(UMI)))`, plus DRAGEN whitelist filtering. Its logic is what the workflow implements; the whitelist filter is the `whitelist` column in `config/samples.tsv`. |
 | `mahimahi_81423.ipynb` | — | `allreadsdir()` does `spread(UMI, UMI)`, which would make one column per UMI value. Abandoned. |
-| `Scissors_Analysis_v4.ipynb` | `analysis/scissors_replication.R` + `analysis/replication.R` | `fitSet()` could not return (bare `break`); `CollectFiles()` dropped the `Neg`/`Pos` columns a later cell needed; stale factor levels silently dropped a sample; axis labels described `Rep_Index` while plotting the slope; several cells referenced undefined objects. |
+| `Scissors_Analysis_v4.ipynb` | `analysis/mahimahi_replication.R` + `analysis/replication.R` | `fitSet()` could not return (bare `break`); `CollectFiles()` dropped the `Neg`/`Pos` columns a later cell needed; stale factor levels silently dropped a sample; axis labels described `Rep_Index` while plotting the slope; several cells referenced undefined objects. |
 | `SCISSORS_SeuratAnalysis.r` | `analysis/PV_mutants_integrated.R` | See `NEWS.md`. |
 | `CVB3.r`, `EVA71.r` | `analysis/CVB3_QC.Rmd`, `analysis/EVA71_QC.Rmd` | Were R Markdown with a `.r` extension, so `Rscript` could never run them. |
 
@@ -51,15 +51,15 @@ so **that plot must be a perfect y=x line**. If it is, the counts came from a
 Python version and the donor/acceptor result needs regenerating through the
 workflow. If the points scatter, they came from `mahimahi.Rnb.ipynb` and stand.
 
-`analysis/scissors_replication.R` checks this automatically and warns when more
+`analysis/mahimahi_replication.R` checks this automatically and warns when more
 than 99% of co-infected cells have identical `Rep_Index` across templates.
 
 ## Column mapping
 
-The workflow's `results/scissors_counts.tsv.gz` keeps the original column
+The workflow's `results/mahimahi_counts.tsv.gz` keeps the original column
 names, so existing analysis code mostly ports directly.
 
-| `*_CBC_SCISSORS.csv` | `scissors_counts.tsv.gz` | Note |
+| `*_CBC_SCISSORS.csv` | `mahimahi_counts.tsv.gz` | Note |
 | --- | --- | --- |
 | `CBC` | `CBC` | same |
 | `ref_name` | `ref_name` | same |

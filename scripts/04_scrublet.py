@@ -38,7 +38,7 @@ import os
 import sys
 
 DEFAULT_CELLRANGER_DIR = os.environ.get(
-    "SCISSORS_CELLRANGER_DIR",
+    "MAHIMAHI_CELLRANGER_DIR",
     "/data/lvd_qve/Projects/PTD_StrandSpecificCounting_scRNAseq/CellRanger",
 )
 
@@ -76,8 +76,8 @@ def main(argv=None):
     except ImportError as exc:
         sys.exit(f"Missing dependency: {exc}.\n"
                  "Install the environment with:\n"
-                 "    conda env create -f workflow/envs/scissors.yaml && "
-                 "conda activate scissors")
+                 "    conda env create -f workflow/envs/mahimahi.yaml && "
+                 "conda activate mahimahi")
 
     # scanpy.pp.scrublet needs scikit-image to pick the doublet-score threshold
     # automatically, and it is NOT a hard dependency of scanpy -- a plain
@@ -92,7 +92,7 @@ def main(argv=None):
                 "threshold automatically, and it is not installed.\n"
                 "Either install it:\n"
                 "    conda install -c conda-forge scikit-image\n"
-                "(it is included in workflow/envs/scissors.yaml)\n"
+                "(it is included in workflow/envs/mahimahi.yaml)\n"
                 "or set the threshold yourself with --threshold.")
 
     matrix_dir = args.matrix_dir or os.path.join(

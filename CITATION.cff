@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "SCISSORS: Single Cell Isolated Strand Specific Observation of Replication State"
+title: "mahimahi: a pipeline for Single Cell Isolated Strand Specific Observation of Replication State (SCISSORS)"
 message: "If you use this software, please cite it as below."
 type: software
 abstract: >-

@@ -57,7 +57,7 @@ def parse_args(argv=None):
     p.add_argument("--reverse-is-positive", dest="reverse_is_positive",
                    action="store_true", default=True,
                    help="reverse-mapped reads are positive-sense viral RNA "
-                        "(the convention every existing SCISSORS script uses)")
+                        "(the convention every original script uses)")
     p.add_argument("--forward-is-positive", dest="reverse_is_positive",
                    action="store_false",
                    help="invert the strand convention")

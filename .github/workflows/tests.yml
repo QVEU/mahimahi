@@ -28,8 +28,8 @@ jobs:
       - name: Install environment
         uses: mamba-org/setup-micromamba@v2
         with:
-          environment-file: workflow/envs/scissors.yaml
-          environment-name: scissors
+          environment-file: workflow/envs/mahimahi.yaml
+          environment-name: mahimahi
           cache-environment: true
 
       - name: Record versions
@@ -66,8 +66,8 @@ jobs:
       - name: Install environment
         uses: mamba-org/setup-micromamba@v2
         with:
-          environment-file: workflow/envs/scissors.yaml
-          environment-name: scissors
+          environment-file: workflow/envs/mahimahi.yaml
+          environment-name: mahimahi
           cache-environment: true
 
       - name: Record versions
@@ -86,11 +86,11 @@ jobs:
         # No --stubs: this runs against the real Seurat, mixtools and scanpy,
         # which is the only way the v4/v5 return-type differences show up.
         #
-        # SCISSORS_SMOKE_OUTDIR keeps the smoke test's logs and rendered
+        # MAHIMAHI_SMOKE_OUTDIR keeps the smoke test's logs and rendered
         # notebooks after it finishes, so the upload step below has something
         # to collect. Without it the test cleans up its own mktemp dir first.
         env:
-          SCISSORS_SMOKE_OUTDIR: ${{ runner.temp }}/smoke
+          MAHIMAHI_SMOKE_OUTDIR: ${{ runner.temp }}/smoke
         run: bash tests/run_tests.sh --require-deps
 
       - name: Upload logs and renders on failure
@@ -98,7 +98,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: failed-renders
-          # Matches SCISSORS_SMOKE_OUTDIR above. The previous globs
+          # Matches MAHIMAHI_SMOKE_OUTDIR above. The previous globs
           # (/tmp/*.log, **/*.html) matched nothing, because the smoke test
           # had already removed its temp directory.
           path: ${{ runner.temp }}/smoke

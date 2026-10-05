@@ -1,4 +1,4 @@
-## Shared paths for the SCISSORS R analyses.
+## Shared paths for the mahimahi R analyses.
 ## Sourced by every script in analysis/. Edit here, not in the scripts.
 
 ## ---------------------------------------------------------------------------
@@ -16,10 +16,10 @@
 ## without editing any paths.
 ## ---------------------------------------------------------------------------
 resolve_share_root <- function() {
-  override <- Sys.getenv("SCISSORS_SHARE_ROOT", unset = NA)
+  override <- Sys.getenv("MAHIMAHI_SHARE_ROOT", unset = NA)
   if (!is.na(override) && nzchar(override)) {
     if (!dir.exists(override)) {
-      stop("SCISSORS_SHARE_ROOT is set to a path that does not exist: ", override)
+      stop("MAHIMAHI_SHARE_ROOT is set to a path that does not exist: ", override)
     }
     return(normalizePath(override))
   }
@@ -38,7 +38,7 @@ resolve_share_root <- function() {
 
   stop("Could not find the lab share. Tried:\n  ",
        paste(candidates, collapse = "\n  "),
-       "\nMount it, or set SCISSORS_SHARE_ROOT to its location.")
+       "\nMount it, or set MAHIMAHI_SHARE_ROOT to its location.")
 }
 
 SHARE_ROOT     <- resolve_share_root()
@@ -70,21 +70,21 @@ PV_SAMPLE_IDS_ALL <- c(
   "Mock_5h_PV"
 )
 
-## SCISSORS_PV_SAMPLE_IDS restricts the run to a comma-separated subset, for a
+## MAHIMAHI_PV_SAMPLE_IDS restricts the run to a comma-separated subset, for a
 ## quick check on a few samples or for the smoke test in tests/seurat/, which
 ## cannot afford to synthesise all fourteen. Unknown names are an error rather
 ## than silently ignored -- a typo here would otherwise just drop a sample.
 PV_SAMPLE_IDS <- local({
-  override <- Sys.getenv("SCISSORS_PV_SAMPLE_IDS", unset = "")
+  override <- Sys.getenv("MAHIMAHI_PV_SAMPLE_IDS", unset = "")
   if (!nzchar(override)) return(PV_SAMPLE_IDS_ALL)
   ids <- trimws(strsplit(override, ",", fixed = TRUE)[[1]])
   ids <- ids[nzchar(ids)]
   unknown <- setdiff(ids, PV_SAMPLE_IDS_ALL)
   if (length(unknown) > 0) {
-    stop("SCISSORS_PV_SAMPLE_IDS names sample(s) not in PV_SAMPLE_IDS_ALL: ",
+    stop("MAHIMAHI_PV_SAMPLE_IDS names sample(s) not in PV_SAMPLE_IDS_ALL: ",
          paste(unknown, collapse = ", "))
   }
-  message("SCISSORS_PV_SAMPLE_IDS: restricted to ", length(ids), " of ",
+  message("MAHIMAHI_PV_SAMPLE_IDS: restricted to ", length(ids), " of ",
           length(PV_SAMPLE_IDS_ALL), " samples (",
           paste(ids, collapse = ", "), ")")
   ids

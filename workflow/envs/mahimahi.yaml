@@ -1,8 +1,8 @@
-# Conda environment for the whole of SCISSORS -- the Snakemake strand-counting
+# Conda environment for the whole of mahimahi -- the Snakemake strand-counting
 # workflow, the doublet step, and the R analyses.
 #
-#   conda env create -f workflow/envs/scissors.yaml
-#   conda activate scissors
+#   conda env create -f workflow/envs/mahimahi.yaml
+#   conda activate mahimahi
 #
 # or let Snakemake build it per rule:
 #
@@ -54,7 +54,7 @@
 # conda-forge's (R 4.3.3, ggplot2 3.4.4, data.table 1.14.10 at the time of
 # writing), so installing the R side from apt defeats the point of these
 # floors. Use conda.
-name: scissors
+name: mahimahi
 channels:
   - conda-forge
   - bioconda

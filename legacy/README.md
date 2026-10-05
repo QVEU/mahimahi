@@ -18,8 +18,8 @@ repository took over the mahimahi name.
 | `process_mahimahi-Working020724.ipynb` | Python 3.9 | Same, with `ref_name` added to the groupby — a partial fix. The `pivot_table(index="CBC")` was left alone, so `Neg`/`Pos`/`Rep_Index` remained averaged across templates. | `workflow/scripts/tabulate_strands.py` |
 | `mahimahi.Rnb.ipynb` | R | The **only correct tabulation**: `dcast(CBC+strand ~ ref_name, fun.aggregate = length(unique(UMI)))`, plus DRAGEN barcode-whitelist filtering. Its logic is what the workflow implements. | `workflow/scripts/tabulate_strands.py`, whitelist via the `whitelist` column in `config/samples.tsv` |
 | `mahimahi_81423.ipynb` | R 4.3.1 | `allreadsdir()` does `spread(UMI, UMI)`, which would make one column per UMI *value*. Abandoned. | — |
-| `mahimahi_Analysis_Plotting.ipynb` | R | Earlier plotting pass over the strand counts. | `analysis/scissors_replication.R` |
-| `Scissors_Analysis_v4.ipynb` | R (mislabelled `Python 3`) | The main replication analysis and figures. | `analysis/scissors_replication.R` + `analysis/replication.R` |
+| `mahimahi_Analysis_Plotting.ipynb` | R | Earlier plotting pass over the strand counts. | `analysis/mahimahi_replication.R` |
+| `Scissors_Analysis_v4.ipynb` | R (mislabelled `Python 3`) | The main replication analysis and figures. | `analysis/mahimahi_replication.R` + `analysis/replication.R` |
 
 Cell outputs are left embedded. They are most of the file size, and they are
 also the evidence of what these notebooks actually produced.
@@ -71,7 +71,7 @@ came from a Python version and the donor/acceptor result needs regenerating
 through `workflow/`. If the points scatter, they came from
 `mahimahi.Rnb.ipynb` and stand.
 
-`analysis/scissors_replication.R` checks this automatically and warns when more
+`analysis/mahimahi_replication.R` checks this automatically and warns when more
 than 99% of co-infected cells share an identical `Rep_Index` across templates.
 
 ## Package versions these assumed

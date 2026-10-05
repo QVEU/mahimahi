@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=scissors_mkref
+#SBATCH --job-name=mahimahi_mkref
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=8:00:00
