@@ -27,7 +27,7 @@ authors:
 # TODO: add ORCIDs and a DOI before citing this externally. Deliberately
 # omitted rather than guessed -- an ORCID is a real identifier and a wrong one
 # misattributes the work.
-repository-code: "https://github.com/QVEU/SCISSORS-pipeline"
+repository-code: "https://github.com/QVEU/mahimahi"
 license: CC0-1.0
 keywords:
   - single-cell RNA-seq
