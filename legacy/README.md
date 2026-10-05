@@ -7,7 +7,7 @@ explains each change and why.
 
 They are archived here because they exist nowhere else. The four original
 mahimahi scripts are *not* copied into this directory — they live in
-[QVEU/mahimahi](https://github.com/QVEU/mahimahi) at commit `4c223b9`, verified
+[QVEU/mahimahi-legacy](https://github.com/QVEU/mahimahi-legacy) at commit `4c223b9`, verified
 byte-identical to the versions reviewed. A link is better than a copy that
 immediately starts drifting.
 

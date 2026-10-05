@@ -1,6 +1,6 @@
 # SCISSORS
 
-[![tests](https://github.com/QVEU/SCISSORS-pipeline/actions/workflows/tests.yml/badge.svg)](https://github.com/QVEU/SCISSORS-pipeline/actions/workflows/tests.yml)
+[![tests](https://github.com/QVEU/mahimahi/actions/workflows/tests.yml/badge.svg)](https://github.com/QVEU/mahimahi/actions/workflows/tests.yml)
 
 **S**ingle **C**ell **I**solated **S**trand **S**pecific **O**bservation of
 **R**eplication **S**tate
