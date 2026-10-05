@@ -22,7 +22,7 @@ REF_GTF="genomePVmrubygtf.gtf"
 # which is a different parent directory with a spurious fasta/ component, and
 # is not where mkref wrote. The mkref-consistent path is used here because it
 # matches the provenance comment in analysis/PV_mutants_integrated.R. If the
-# published counts came from the other path, change this one line -- but the
+# existing counts came from the other path, change this one line -- but the
 # two references would then not be the same object, so confirm before reusing
 # any existing count matrices. See README "Known open questions".
 TRANSCRIPTOME="${REF_BUILD_DIR}/${REF_GENOME_NAME}"

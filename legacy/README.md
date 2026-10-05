@@ -1,7 +1,7 @@
 # Legacy analyses — retained for provenance, not for use
 
 These notebooks are the original SCISSORS analyses, kept unchanged because they
-are the record of what produced the published results. **Do not run them.**
+are the record of what produced the results so far. **Do not run them.**
 Their replacements are listed below, and [../docs/MIGRATION.md](../docs/MIGRATION.md)
 explains each change and why.
 
@@ -58,10 +58,12 @@ produced  both templates  Neg=41.43  Pos=918.18  Rep_Index=0.0432
 declares a `Python 3` kernel but contains R throughout; opening it with the
 declared kernel fails on the first cell.
 
-## Which produced the published figures?
+## Which produced the existing figures?
 
-This has not been established, and it matters: the two Python tabulations and
-the R one do not agree with each other.
+This has not been established, and the three tabulations do not agree with each
+other. None of it is published, so the fix is to regenerate through `workflow/`
+rather than to work out retrospectively which notebook was used; the test below
+is only worth running if you need to know whether an existing figure was wrong.
 
 `Scissors_Analysis_v4.ipynb` cell 19 plots per-cell `Rep_Index` for eGFP
 against mRuby3. Under the `pivot_table` bug both templates carry the same

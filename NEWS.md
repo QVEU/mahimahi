@@ -129,7 +129,8 @@ Removed.
 committed, so the doublet scores could not be regenerated.
 `scripts/04_scrublet.py` is a reimplementation using Scrublet's documented
 defaults — **its parameters are not recovered from the original**, so validate
-against existing TSVs before reusing it on published data.
+against the existing TSVs before treating its scores as comparable to the
+earlier ones.
 
 **Misleading section header.** "Perform integration analysis" preceded a plain
 `merge()` with no integration or batch correction. Retitled.

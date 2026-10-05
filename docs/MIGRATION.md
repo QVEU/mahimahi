@@ -26,10 +26,17 @@ archived. The six notebooks had no home anywhere and are kept in
 | `SCISSORS_SeuratAnalysis.r` | `analysis/PV_mutants_integrated.R` | See `NEWS.md`. |
 | `CVB3.r`, `EVA71.r` | `analysis/CVB3_QC.Rmd`, `analysis/EVA71_QC.Rmd` | Were R Markdown with a `.r` extension, so `Rscript` could never run them. |
 
-## Which version produced your published CSVs?
+## Which version produced your existing CSVs?
 
-This is the one question that decides whether anything needs regenerating,
-because the two Python tabulations and the R one do not agree.
+Nothing here has been published, so this is a question about what your current
+working numbers mean, not about whether a result has to be corrected. The
+cheapest answer is usually to skip the forensics: regenerate through
+`workflow/`, which is tested against synthetic ground truth, and compare. The
+diagnostic below is worth running only if regenerating is expensive -- the raw
+SAM/BAMs are gone, say, or a figure is already in a talk and you want to know
+whether it was wrong.
+
+It matters because the two Python tabulations and the R one do not agree.
 
 `Scissors_Analysis_v4.ipynb` cell 19 plots per-cell `Rep_Index` for eGFP
 against mRuby3:

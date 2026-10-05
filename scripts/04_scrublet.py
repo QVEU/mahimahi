@@ -18,10 +18,10 @@ own default expected_doublet_rate is 0.05; this script keeps 0.06 and passes it
 explicitly, so the value in force is visible rather than inherited from
 whatever the library currently defaults to.
 
-Before reusing this on data you have already published, check that the scores
-line up with your existing *_Doublet_scores.tsv files. The per-sample
-doublet_scores cutoffs in analysis/config.R (0.45-0.58) were tuned against the
-original output and are only meaningful on the same scale.
+The per-sample doublet_scores cutoffs in analysis/config.R (0.45-0.58) were
+tuned against the original standalone scrublet and are only meaningful on the
+same scale, so re-pick them from the distributions this script produces rather
+than carrying the old numbers over.
 
 Output format (tab-separated, with header):
     barcode <TAB> doublet_score <TAB> predicted_doublet

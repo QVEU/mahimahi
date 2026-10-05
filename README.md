@@ -453,7 +453,7 @@ depends on the chemistry and on which mate was aligned. Inverting it swaps
 reasonable.
 
 `strand.convention` defaults to `reverse_is_positive`, which is what every
-existing SCISSORS script used and what the published output corroborates
+existing SCISSORS script used and what the earlier output corroborates
 (`Pos` dominant, `Neg` at 0.7-4%).
 
 Rather than trust it, set `strand.sense_control` to a reference whose
@@ -611,20 +611,26 @@ with no warning and no error.
 
 **Worth checking against your existing data**: run the per-sample analysis with
 an old 2-column TSV. If it errors on the row-count assertion, that sample's
-published doublet filtering was applied to the wrong cells. If it passes, no
-barcodes were dropped and the original result stands.
+doublet filtering was applied to the wrong cells. If it passes, no barcodes
+were dropped and the earlier result stands.
 
-Regenerate with `scripts/04_scrublet.py` to get the barcoded form. Note the
+Regenerate with `scripts/04_scrublet.py` to get the barcoded form. The
 per-sample `doublet_max` cutoffs in `analysis/config.R` (0.45–0.58) were tuned
-against the original Scrublet output, so re-tune them if the new score
-distributions differ.
+by hand against the original standalone Scrublet, which is unmaintained and has
+been replaced by `scanpy.pp.scrublet`. The new scores are on a similar but not
+identical scale, and since no result here is final there is nothing to
+reproduce: **pick the cutoffs from the new score distributions** rather than
+trying to recover the old ones. Plot a histogram per sample and put the cutoff
+in the gap; the old values are a starting point, not a target.
 
 ## Known open questions
 
-Two things could not be resolved from the repository and need someone who ran
-the original experiments.
+Three things could not be resolved from the repository and need someone who ran
+the original experiments. None of this work is published, so each of these is a
+question about the data you have in hand — and the first two are answerable by
+regenerating rather than by reconstructing what happened before.
 
-### 1. Which reference did the published counts use?
+### 1. Which reference did the existing counts use?
 
 `00_mkref.sh` builds into:
 
@@ -640,10 +646,16 @@ original count script counted against:
 ```
 
 A different parent directory, with a spurious `fasta/` component. At most one
-of these is the reference the published matrices came from. `config.sh` uses
+of these is the reference the existing matrices came from. `config.sh` uses
 the mkref-consistent path; if the other one is correct, change the
 `TRANSCRIPTOME` line — but the two would then not be the same object, so
 confirm before reusing any existing count matrices.
+
+Since nothing is published, the clean resolution is to run `00_mkref.sh` and
+`02_count.sh` once against the path in `config.sh` and use those matrices
+throughout, rather than to establish which reference the old ones used. That
+also settles the Cell Ranger version question, since the rebuild runs on
+whatever your cluster has now.
 
 ### 2. Which two samples are the WT GFP replicates?
 

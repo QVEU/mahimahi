@@ -110,8 +110,11 @@ WT_REPLICATE_SAMPLE_IDS <- c("WT_GFP_PV", "WT_IRES_GFP_PV")
 ## doublet score distribution, so they are data, not defaults -- do not
 ## "tidy" them into a single shared threshold.
 ##
-## doublet_max applies to the Scrublet score. If you regenerate scores with
-## scripts/04_scrublet.py, re-tune these against the new distributions.
+## doublet_max applies to the Scrublet score. These were set against the
+## standalone scrublet package, which is unmaintained; scripts/04_scrublet.py
+## now uses scanpy.pp.scrublet, whose scores are on a similar but not identical
+## scale. Re-pick these from the new per-sample distributions -- no result here
+## is final, so the old values are a starting point, not something to match.
 PV_QC_THRESHOLDS <- list(
   Mock_5h_PV                           = list(min_count = 5000, max_count = 40000, min_feature = 3000, ribo_min = 10, doublet_max = 0.57),
   RFP_C109S_PV                         = list(min_count = 5000, max_count = Inf,   min_feature = 2000, ribo_min = 5,  doublet_max = 0.51),
