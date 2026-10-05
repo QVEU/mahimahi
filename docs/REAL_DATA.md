@@ -99,11 +99,19 @@ workflow still runs but cannot check the strand convention, and an inverted
 convention swaps `Pos` and `Neg` everywhere while looking plausible. A
 viral-only FASTA has no such entry, so add one.
 
-### 4. Chemistry, per run
+### 4. Chemistry: 10x 5' v3 (answered 2026-10-05)
 
-10x 3' **v2** (`umi_length: 10`) or **v3 / v3.1** (`umi_length: 12`). This
-is the one setting most likely to have been wrong before; the run sheet or
-the Cell Ranger `web_summary.html` ("Chemistry") states it.
+5' v3 is 16 nt barcode + 12 nt UMI, which is what `config/config.yaml`
+already sets (`barcode_length: 16`, `umi_length: 12`). If any run used an
+older 5' v1/v2 kit, that run needs `umi_length: 10`.
+
+In a 5' library R2 is antisense to the RNA, so positive-sense viral RNA maps
+reverse: `strand.convention: reverse_is_positive`, the default, is the right
+setting. The sense control still checks it on the real data.
+
+Cell Ranger BAMs from 5' paired-end runs carry both mates, which map in
+opposite orientations; the workflow counts R2 only (R1 is reported as
+`mate1` in `extract_stats.json`).
 
 ### 5. DRAGEN read-name layout (DRAGEN inputs only)
 

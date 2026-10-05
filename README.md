@@ -446,7 +446,7 @@ Set `barcode.source` in `config/config.yaml`, or per sample:
 | `paired_fastq` | raw 10x FASTQ pair | first bases of R1, embedded into the R2 name |
 
 `barcode_length` and `umi_length` are configuration, not literals: **10x 3' v2
-is 16+10, v3 and v3.1 are 16+12.** `mahimahi_dragen.py` hardcoded a 10 nt UMI,
+and 5' v1/v2 are 16+10; 3' v3/v3.1 and 5' v3 are 16+12.** `mahimahi_dragen.py` hardcoded a 10 nt UMI,
 which on v3 discards two bases and shrinks the UMI space 16-fold. The
 resulting undercount is under 1% at typical depth, but it lands mostly on
 `Pos` and so inflates `Neg/Pos` systematically. Set these to the kit you ran.
@@ -460,7 +460,11 @@ reasonable.
 
 `strand.convention` defaults to `reverse_is_positive`, which is what every
 original script used and what the earlier output corroborates
-(`Pos` dominant, `Neg` at 0.7-4%).
+(`Pos` dominant, `Neg` at 0.7-4%). It is also what the chemistry predicts:
+for 10x 5' libraries (the lab's runs are 5' v3) R2 is antisense to the RNA, so
+positive-sense RNA maps reverse. A 3' library would be the opposite. In a
+paired-end BAM (5' paired-end Cell Ranger output) only R2 is counted, since
+the mates map in opposite orientations.
 
 Rather than trust it, set `strand.sense_control` to a reference whose
 orientation you know -- a host transcript, a spike-in, a reporter cassette.
