@@ -1,6 +1,7 @@
 # mahimahi
 
 ![tiny mahimahi](mahimahi.jpg)
+photo credit: Juvenile Mahimahi at the Monterey Bay Aquarium, [https://www.inaturalist.org/photos/254881543].
 
 [![tests](https://github.com/QVEU/mahimahi/actions/workflows/tests.yml/badge.svg)](https://github.com/QVEU/mahimahi/actions/workflows/tests.yml)
 
