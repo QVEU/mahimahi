@@ -4,10 +4,9 @@ SCISSORS accumulated several implementations of the same steps, which
 disagreed with each other. This maps every original file to its replacement
 and says why.
 
-**Where the originals are.** The four mahimahi scripts live in
-[QVEU/mahimahi-legacy](https://github.com/QVEU/mahimahi-legacy) at commit `4c223b9`, verified
-byte-identical to the versions reviewed here; that repository is deprecated and
-archived. The six notebooks had no home anywhere and are kept in
+**Where the originals are.** The four mahimahi scripts were reviewed at
+commit `4c223b9` of the original mahimahi repository, which was deleted in
+October 2026 when this repository took over the mahimahi name. The six notebooks had no home anywhere and are kept in
 [`../legacy/`](../legacy/README.md), unchanged, with their outputs embedded.
 
 ## Retired

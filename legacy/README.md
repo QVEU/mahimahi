@@ -6,10 +6,9 @@ Their replacements are listed below, and [../docs/MIGRATION.md](../docs/MIGRATIO
 explains each change and why.
 
 They are archived here because they exist nowhere else. The four original
-mahimahi scripts are *not* copied into this directory — they live in
-[QVEU/mahimahi-legacy](https://github.com/QVEU/mahimahi-legacy) at commit `4c223b9`, verified
-byte-identical to the versions reviewed. A link is better than a copy that
-immediately starts drifting.
+mahimahi scripts are *not* kept: they lived in the original mahimahi
+repository (commit `4c223b9`), which was deleted in October 2026 when this
+repository took over the mahimahi name.
 
 ## What is here
 
