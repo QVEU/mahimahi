@@ -3,7 +3,7 @@
 # This repository commits gzipped FASTQs, a BAM and Matrix Market files as
 # example data (tests/workflow/fixtures/, tests/seurat/). Without explicit
 # binary markers, a checkout with autocrlf enabled -- or any `* text=auto`
-# inherited from a global config, which is what QVEU/mahimahi-legacy ships -- can
+# inherited from a global config, which is what the original mahimahi repo shipped -- can
 # rewrite line endings inside compressed data and corrupt it.
 *.gz      binary
 *.bam     binary
