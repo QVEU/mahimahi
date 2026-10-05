@@ -292,6 +292,23 @@ conda env create -f workflow/envs/mahimahi.yaml
 conda activate mahimahi
 ```
 
+**On an Apple Silicon Mac** the solve fails with
+`ResolvePackageNotFound: r-mixtools[version='>=2.0']`, because conda-forge
+builds `r-mixtools` for Linux and Intel macOS but not for `osx-arm64`. Every
+other package has an arm64 build. Build the Intel environment instead; it runs
+under Rosetta 2:
+
+```bash
+CONDA_SUBDIR=osx-64 conda env create -f workflow/envs/mahimahi.yaml
+conda activate mahimahi
+conda config --env --set subdir osx-64   # keep later installs Intel too
+```
+
+If conda also prints `Error loading anaconda-anon-usage`, that is an old
+Anaconda base install whose plugin no longer matches its conda. It is noise,
+not the cause of the failure; `conda update -n base conda` or switching to
+Miniforge silences it.
+
 The R analyses target **Seurat v5** and assert it at startup. They were
 originally written against 4.4.0, which is archived on CRAN; `NEWS.md` records
 what the port changed and why results may differ from the v4 run. The doublet
