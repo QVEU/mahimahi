@@ -46,7 +46,8 @@ def parse_args(argv=None):
                    help="0-based colon-delimited field for --name-format dragen (default: 7)")
     p.add_argument("--barcode-length", type=int, default=16)
     p.add_argument("--umi-length", type=int, default=12,
-                   help="10x 3' v2 is 10, v3/v3.1 is 12 (default: 12)")
+                   help="10x 3' v2 and 5' v1/v2 are 10; 3' v3/v3.1 and "
+                        "5' v3 are 12 (default: 12)")
     p.add_argument("--cb-tag", default="CB", help="corrected-barcode tag (default: CB)")
     p.add_argument("--ub-tag", default="UB", help="corrected-UMI tag (default: UB)")
 
@@ -164,6 +165,13 @@ def main(argv=None):
             if rec.is_supplementary and not args.keep_supplementary:
                 counts["supplementary"] += 1
                 continue
+            # In a paired BAM (10x 5' paired-end Cell Ranger output) the mates
+            # map in opposite orientations, so counting both logs every
+            # molecule once as Pos and once as Neg. Strand is defined by R2,
+            # the cDNA read the FASTQ route aligns; R1 is dropped.
+            if rec.is_paired and rec.is_read1:
+                counts["mate1"] += 1
+                continue
             if rec.mapping_quality < args.min_mapq:
                 counts["low_mapq"] += 1
                 continue
@@ -184,7 +192,7 @@ def main(argv=None):
                       f"{strand}\t{rec.flag}\t{rec.mapping_quality}\n")
 
     for key in ("total", "kept", "kept_Pos", "kept_Neg", "unmapped", "secondary",
-                "supplementary", "low_mapq", "no_barcode"):
+                "supplementary", "mate1", "low_mapq", "no_barcode"):
         print(f"  {key:15s} {counts[key]:>12,}", file=sys.stderr)
 
     if counts["kept"] == 0:

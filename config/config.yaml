@@ -31,7 +31,7 @@ barcode:
   name_format: "dragen"
   name_field: 7
 
-  # 10x 3' v2 is 16 + 10. v3 and v3.1 are 16 + 12.
+  # 10x 3' v2 and 5' v1/v2 are 16 + 10. 3' v3/v3.1 and 5' v3 are 16 + 12.
   #
   # mahimahi_dragen.py hardcoded [0:16] and [16:26], i.e. a 10 nt UMI. On v3
   # chemistry that discards the last two bases, shrinking the UMI space 16x
@@ -53,6 +53,12 @@ strand:
   # corroborated by the output of the earlier runs: Pos dominates, with Neg at
   # 0.7-4%,
   # which is the expected (-)/(+) range for a picornavirus.
+  #
+  # It is also what the chemistry predicts for the 10x 5' kits these
+  # libraries were made with: in 5' libraries R2 (the read aligned) is
+  # antisense to the RNA, so positive-sense RNA maps reverse. A 10x 3'
+  # library is the other way round (R2 is sense). In a paired-end BAM only R2
+  # is counted.
   convention: "reverse_is_positive"
 
   # A sequence whose sense orientation is known -- a host transcript,
