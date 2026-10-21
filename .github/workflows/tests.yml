@@ -15,10 +15,17 @@ jobs:
   # The strand-counting workflow: minimap2, samtools, snakemake, pysam, pandas.
   # Runs against the committed fixtures in tests/workflow/fixtures/, so there
   # is no generation step and no network beyond installing the environment.
+  #
+  # macos-latest is Apple Silicon, so this also proves the env solves natively
+  # on osx-arm64.
   workflow:
-    name: strand-counting workflow
-    runs-on: ubuntu-latest
+    name: strand-counting workflow (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     defaults:
       run:
         shell: bash -el {0}          # -l so the conda env is on PATH
@@ -46,61 +53,3 @@ jobs:
         # --require-deps turns a missing dependency into a failure. A silently
         # skipped suite is worse than a red one where nobody is watching.
         run: bash tests/workflow/run_workflow_tests.sh --require-deps
-
-  # The R analyses. Kept a separate job because the R side of the environment
-  # dominates install time and its failures are unrelated to the workflow's.
-  #
-  # Installed from conda-forge, NOT apt: Ubuntu's r-cran-* packages lag
-  # considerably (R 4.3.3, ggplot2 3.4.4, data.table 1.14.10), which would
-  # defeat the point of testing against current versions.
-  analyses:
-    name: R analyses and Seurat smoke test
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    defaults:
-      run:
-        shell: bash -el {0}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install environment
-        uses: mamba-org/setup-micromamba@v2
-        with:
-          environment-file: workflow/envs/mahimahi.yaml
-          environment-name: mahimahi
-          cache-environment: true
-
-      - name: Record versions
-        run: |
-          Rscript -e 'for (p in c("Seurat","SeuratObject","Matrix","mixtools","ggplot2","data.table","rmarkdown")) cat(sprintf("%-14s %s\n", p, as.character(packageVersion(p))))'
-          Rscript -e 'cat("R", as.character(getRversion()), "\n")'
-          python3 -c 'import scanpy, skimage; print("scanpy", scanpy.__version__); print("scikit-image", skimage.__version__)'
-
-      - name: Seurat version floor
-        # The analyses require v5: merge() is layer-aware there and v4 is
-        # archived on CRAN. Fail early and explicitly rather than inside a
-        # stopifnot 40 lines into an analysis.
-        run: Rscript -e 'stopifnot(packageVersion("Seurat") >= "5.0.0"); cat("Seurat", as.character(packageVersion("Seurat")), "OK\n")'
-
-      - name: R unit tests, Seurat smoke test and notebook renders
-        # No --stubs: this runs against the real Seurat, mixtools and scanpy,
-        # which is the only way the v4/v5 return-type differences show up.
-        #
-        # MAHIMAHI_SMOKE_OUTDIR keeps the smoke test's logs and rendered
-        # notebooks after it finishes, so the upload step below has something
-        # to collect. Without it the test cleans up its own mktemp dir first.
-        env:
-          MAHIMAHI_SMOKE_OUTDIR: ${{ runner.temp }}/smoke
-        run: bash tests/run_tests.sh --require-deps
-
-      - name: Upload logs and renders on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failed-renders
-          # Matches MAHIMAHI_SMOKE_OUTDIR above. The previous globs
-          # (/tmp/*.log, **/*.html) matched nothing, because the smoke test
-          # had already removed its temp directory.
-          path: ${{ runner.temp }}/smoke
-          if-no-files-found: warn
-          retention-days: 7

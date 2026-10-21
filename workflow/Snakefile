@@ -119,6 +119,13 @@ def _check_template():
 
 _check_template()
 
+# The aligned BAM is an intermediate unless the config asks to keep it.
+KEEP_BAM = bool(config.get("outputs", {}).get("keep_bam", False))
+
+
+def maybe_temp(path):
+    return path if KEEP_BAM else temp(path)
+
 
 def is_fastq(sample):
     return SAMPLES.loc[sample, "input"].endswith(FASTQ_SUFFIXES)
@@ -174,6 +181,8 @@ rule all:
         f"{RESULTS}/mahimahi_counts.tsv.gz",
         f"{RESULTS}/strand_qc_summary.tsv",
         expand(f"{RESULTS}/{{sample}}/counts_long.tsv.gz", sample=SAMPLE_NAMES),
+        expand(f"{RESULTS}/{{sample}}/aligned.bam.bai",
+               sample=[s for s in SAMPLE_NAMES if is_fastq(s)] if KEEP_BAM else []),
 
 
 # ---------------------------------------------------------------------------
@@ -215,7 +224,7 @@ rule align:
         reads=alignment_input,
         template=config["template"],
     output:
-        temp(f"{RESULTS}/{{sample}}/aligned.bam"),
+        maybe_temp(f"{RESULTS}/{{sample}}/aligned.bam"),
     params:
         preset=config["align"]["preset"],
         extra=config["align"].get("extra", ""),
@@ -228,6 +237,20 @@ rule align:
         "(minimap2 -t {threads} -a -x {params.preset} {params.extra} "
         "{input.template} {input.reads} "
         "| samtools sort -@ 2 -o {output} -) 2> {log}"
+
+
+rule index_bam:
+    """Index a kept BAM (outputs.keep_bam) so it opens in IGV or samtools view."""
+    input:
+        f"{RESULTS}/{{sample}}/aligned.bam",
+    output:
+        f"{RESULTS}/{{sample}}/aligned.bam.bai",
+    log:
+        f"{RESULTS}/{{sample}}/logs/index_bam.log",
+    conda:
+        CONDA_ENV
+    shell:
+        "samtools index {input} 2> {log}"
 
 
 rule normalise_alignments:

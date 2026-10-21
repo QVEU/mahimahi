@@ -80,3 +80,9 @@ align:
   preset: "sr"
   extra: ""
   threads: 8
+
+outputs:
+  # Keep the minimap2 BAM (results/<sample>/aligned.bam, plus its .bai) for
+  # FASTQ inputs. Off by default: the counts only need it while they are
+  # being made. BAM inputs are never copied.
+  keep_bam: false

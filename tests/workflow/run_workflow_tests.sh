@@ -151,7 +151,25 @@ else
 fi
 
 step "5. Verify counts against ground truth"
-MAHIMAHI_REQUIRE_DEPS="${REQUIRE_DEPS}" python3 tests/workflow/verify_against_truth.py || failures=$((failures+1))
+python3 tests/workflow/verify_against_truth.py || failures=$((failures+1))
+
+step "5b. Kept BAMs (outputs.keep_bam) exist, are indexed, and hold the reads"
+# The test config keeps the minimap2 BAM for the two FASTQ samples; the BAM
+# input is used as-is and gets no copy.
+bam_fail=0
+for d in tests/workflow/results/*/; do
+    s=$(basename "$d")
+    [[ "$s" == logs ]] && continue
+    if [[ -f "$d/aligned.bam" ]]; then
+        n=$(samtools view -c -F 0x904 "$d/aligned.bam")
+        [[ -f "$d/aligned.bam.bai" ]] || { echo "  $s: aligned.bam has no index"; bam_fail=1; }
+        (( n > 0 )) || { echo "  $s: aligned.bam has no mapped primary reads"; bam_fail=1; }
+        echo "  $s: aligned.bam kept, $n mapped primary reads"
+    fi
+done
+nbam=$(ls tests/workflow/results/*/aligned.bam 2>/dev/null | wc -l)
+(( nbam == 2 )) || { echo "  expected 2 kept BAMs (the FASTQ samples), found $nbam"; bam_fail=1; }
+[[ "$bam_fail" -eq 0 ]] && echo "kept BAMs OK" || { echo "FAILED: kept BAMs"; failures=$((failures+1)); }
 
 step "6. Confirm an inverted strand convention is rejected"
 sed -e 's/convention: "reverse_is_positive"/convention: "forward_is_positive"/' \

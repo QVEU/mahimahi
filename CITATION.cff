@@ -3,14 +3,11 @@ title: "mahimahi: a pipeline for Single Cell Isolated Strand Specific Observatio
 message: "If you use this software, please cite it as below."
 type: software
 abstract: >-
-  A single-cell RNA-seq pipeline that simultaneously quantifies enterovirus
-  replication and the host transcriptional response in the same cells. Reads are
-  counted against a reference carrying the viral genome and reporter cassettes,
-  and positive- and negative-strand UMIs are tallied per cell and per template.
-  Because the negative strand is the replication intermediate of a
-  positive-strand RNA virus, the (-)/(+) ratio measures replication rather than
-  viral load, and per-template counting resolves co-infecting genomes within a
-  single cell.
+  A pipeline that counts positive- and negative-strand UMIs per cell and per
+  template from 10x single-cell RNA-seq data. Because the negative strand is
+  the replication intermediate of a positive-strand RNA virus, the (-)/(+)
+  ratio measures replication rather than viral load, and per-template counting
+  resolves co-infecting genomes within a single cell.
 authors:
   - family-names: Dolan
     given-names: Patrick T.
