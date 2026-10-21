@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check workflow output against the fixture ground truth."""
-import json, sys, os, shutil
+import json, sys, os
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -52,60 +52,6 @@ for sample in sorted(merged["sample"].unique()):
           f"-> {'DISTINCT (correct)' if distinct else 'IDENTICAL (bug present)'}")
     if not distinct:
         failures.append(f"{sample}: per-template Rep_Index collapsed")
-
-# End-to-end: does a slope fitted from workflow output recover the rate the
-# reads were built from?
-print("=== END-TO-END: fitted slope vs the rate the reads were generated at ===")
-rates = truth.get("population_rates", {})
-if rates and shutil.which("Rscript") is None:
-    # The counts above are the workflow's own output and are fully checked
-    # without R. This last check runs the R analysis on them, so it needs
-    # Rscript; skip it like the runner skips missing tools, unless the caller
-    # asked for missing dependencies to be failures.
-    if os.environ.get("MAHIMAHI_REQUIRE_DEPS") == "1":
-        failures.append("Rscript not on PATH; cannot run the slope check")
-    else:
-        print("  SKIP: Rscript not on PATH, so analysis/mahimahi_replication.R")
-        print("  cannot be run. Install the R side of workflow/envs/mahimahi.yaml.")
-elif rates:
-    import subprocess, tempfile, csv
-    figdir = tempfile.mkdtemp(prefix="mahimahi_fit_")
-    proc = subprocess.run(
-        ["Rscript", "analysis/mahimahi_replication.R",
-         f"--counts={os.path.join(HERE, 'results', 'mahimahi_counts.tsv.gz')}",
-         f"--figures={figdir}", "--min-umis=50"],
-        capture_output=True, text=True, cwd=os.path.join(HERE, "..", ".."))
-    slopes_csv = os.path.join(figdir, "replication_slopes.csv")
-    if not os.path.exists(slopes_csv):
-        print("  could not run analysis/mahimahi_replication.R:")
-        print("  " + (proc.stderr or proc.stdout).strip()[-500:])
-        failures.append("analysis script did not produce replication_slopes.csv")
-    else:
-        with open(slopes_csv) as fh:
-            rows = [r for r in csv.DictReader(fh) if r["status"] == "ok"]
-        print(f"  {'sample':12s} {'template':12s} {'cells':>6s} {'true':>7s} "
-              f"{'fitted':>9s} {'95% CI':>22s}")
-        for r in sorted(rows, key=lambda x: (x["ref_name"], x["sample"])):
-            ref = r["ref_name"]
-            if ref not in rates:
-                continue
-            true, got = rates[ref], float(r["slope"])
-            lo, hi = float(r["conf_low"]), float(r["conf_high"])
-            inside = lo <= true <= hi
-            print(f"  {r['sample']:12s} {ref:12s} {r['n_cells']:>6s} {true:>7.3f} "
-                  f"{got:>9.5f} {'[%.5f, %.5f]' % (lo, hi):>22s} "
-                  f"{'ok' if inside else 'TRUE RATE OUTSIDE CI'}")
-            if not inside:
-                failures.append(f"{r['sample']}/{ref}: true {true} outside CI [{lo},{hi}]")
-        if not rows:
-            failures.append("no groups were fitted successfully")
-        # The figures the script is supposed to have drawn.
-        for fig in ("neg_vs_pos.pdf", "replication_rate_slope.pdf",
-                    "replication_rate_index.pdf", "donor_acceptor.pdf"):
-            if not os.path.exists(os.path.join(figdir, fig)):
-                failures.append(f"figure not produced: {fig}")
-        produced = sorted(f for f in os.listdir(figdir) if f.endswith(".pdf"))
-        print(f"\n  figures produced: {', '.join(produced)}")
 
 print()
 if failures:

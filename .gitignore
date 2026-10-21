@@ -1,47 +1,16 @@
-# Slurm job logs (the directory itself is tracked so a fresh clone can run)
-logs/*
-!logs/.gitkeep
-*_out
-*.err
-*.log
-slurm-*.out
+# Snakemake
+.snakemake/
+results/
+tests/workflow/results*/
+# tests/workflow/fixtures/ is TRACKED: it is the committed example data.
+# Verify with: python3 tests/workflow/make_fixtures.py --check
+tests/workflow/config_inverted.yaml
 
-# Cell Ranger outputs -- large, and live on the share, not in git
-*/outs/
-_cmdline
-_filelog
-_finalstate
-_invocation
-_jobmode
-_log
-_mrosource
-_perf*
-_sitecheck
-_tags
-_timestamp
-_uuid
-_vdrkill
-_versions
-
-# Analysis outputs
-*.rds
-*.RDS
-*.h5
-*.mtx
-*.mtx.gz
-
-# Knitted notebooks
-*.html
-*_files/
-*_cache/
-
-# R session state
-.Rhistory
-.Rapp.history
-.RData
-.Ruserdata
-.Rproj.user/
-*.Rproj
+# Large sequencing files belong on the share, not in git
+*.bam
+*.bai
+*.cram
+!tests/workflow/fixtures/*.bam
 
 # Python
 __pycache__/
@@ -52,11 +21,3 @@ venv/
 # OS cruft
 .DS_Store
 Thumbs.db
-
-# Snakemake
-.snakemake/
-results/
-tests/workflow/results*/
-# tests/workflow/fixtures/ is TRACKED: it is the committed example data.
-# Verify with: python3 tests/workflow/make_fixtures.py --check
-tests/workflow/config_inverted.yaml

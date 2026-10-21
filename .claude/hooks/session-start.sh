@@ -3,12 +3,10 @@
 #
 # The cloud container image is plain Ubuntu with system Python and pip -- no
 # conda anywhere. This installs it so the project's own environment
-# (workflow/envs/mahimahi.yaml) can be built, which is the only way to get the
-# R side at the versions the analyses target: CRAN is blocked by the network
-# policy, and Ubuntu's r-cran-* packages lag far enough to defeat the floors.
+# (workflow/envs/mahimahi.yaml) can be built: bioconda's minimap2, samtools
+# and pysam are not available from apt or pip at matching versions.
 #
-# Deliberately does NOT create the conda environment. That is ~400 packages and
-# roughly 15 minutes, which is too long to sit in front of every session start.
+# Does NOT create the conda environment by default; it takes a few minutes.
 # Set MAHIMAHI_CREATE_ENV=1 to opt in; the container state is cached after the
 # hook completes, so the cost is paid once rather than per session.
 #
@@ -81,7 +79,7 @@ if [ "${MAHIMAHI_CREATE_ENV:-0}" = "1" ]; then
     if "${CONDA}" env list | grep -qE '^mahimahi[[:space:]]'; then
         log "conda env 'mahimahi' already exists"
     elif [ -f "${ENV_YAML}" ]; then
-        log "creating conda env 'mahimahi' (~400 packages, this takes a while)"
+        log "creating conda env 'mahimahi' (a few minutes)"
         "${CONDA}" env create -f "${ENV_YAML}" -n mahimahi >/dev/null
         log "created. activate with: conda activate mahimahi"
     else

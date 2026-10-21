@@ -47,12 +47,9 @@ TRUTH = {
     ("CELL_CCCCCCCCCCCCC", "mRuby3"):      {"Pos": 8,  "Neg": 2},
 }
 
-# A population of cells with a known per-template (-)/(+) rate, so the
-# regression slope recovered by analysis/replication.R can be checked against
-# the value the reads were built from. Kept deliberately noise-free: the point
-# is to verify the plumbing from FASTQ through to a fitted slope, not to
-# characterise the estimator (tests/test_replication_fit.R does that with
-# noise).
+# A population of cells with a known per-template (-)/(+) rate. Gives the
+# fixtures enough cells, at a spread of depths, for a downstream slope fit of
+# Neg ~ Pos to recover the rate the reads were built from.
 POPULATION_RATES = {"eGFP": 0.05, "mRuby3": 0.20}
 POPULATION_CELLS = 24
 

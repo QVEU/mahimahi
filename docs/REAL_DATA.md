@@ -7,34 +7,23 @@ real samples.
 
 ## Verified on the example data
 
-On a fresh clone, with only the workflow's tools installed:
+On a fresh clone:
 
 ```bash
-conda create -n wf -c conda-forge -c bioconda \
-    'python>=3.11' 'snakemake-minimal>=8.18' 'pysam>=0.22' 'pandas>=2.1' \
-    'numpy>=1.24' 'minimap2>=2.26' 'samtools>=1.19' \
-    'r-base>=4.4' 'r-ggplot2>=3.4' 'r-data.table>=1.14'
-conda activate wf
+conda env create -f workflow/envs/mahimahi.yaml && conda activate mahimahi
 bash tests/workflow/run_workflow_tests.sh
 ```
 
-(The full `workflow/envs/mahimahi.yaml` works too; the list above is the
-subset the workflow and its slope check need, and skips Seurat.)
-
 Result, 2026-10-05, python 3.14.7, pysam 0.24.1, pandas 3.0.6, snakemake
-9.27.0, minimap2 2.31, samtools 1.24:
+9.27.0, minimap2 2.31, samtools 1.24 (re-checked 2026-10-21 after the
+cell-analysis code was removed):
 
 - every per-cell, per-template `Pos`/`Neg`/`Rep_Index` value matches the
   synthetic truth for all three input routes (234 rows);
 - eGFP and mRuby3 in the same cell come out distinct (0.0909 vs 0.3333);
-- fitted slopes recover the generating rates (eGFP 0.04908, 95% CI
-  0.04797–0.05018, true 0.05; mRuby3 0.19849, CI 0.19689–0.20010, true 0.20);
 - an inverted strand convention is rejected by the sense control;
 - a second run is a no-op, and a clean re-run gives a byte-identical
   decompressed `mahimahi_counts.tsv.gz`.
-
-Without `Rscript` on PATH the slope check is skipped (or fails under
-`--require-deps`); the count checks do not need R.
 
 ## What a real run needs
 
@@ -88,7 +77,7 @@ config files (one `template` per run), e.g. `config/cvb3.yaml`,
 `config/pv_donor_acceptor.yaml`, each passed with `--configfile`.
 
 For Cell Ranger BAM inputs the FASTA is unused; the `ref_name` values come
-from the BAM header (`PV`, `GFP`, `mRuby` in the `00_mkref.sh` reference).
+from the BAM header (`PV`, `GFP`, `mRuby` in the lab's Cell Ranger reference).
 
 ### 3. A sense control
 
@@ -117,7 +106,7 @@ stops with the offending read if it is wrong.
 Per sample, the called-cell list: Cell Ranger's
 `filtered_feature_bc_matrix/barcodes.tsv.gz` or DRAGEN's
 `*.scRNA.barcodeSummary.tsv`. Goes in the `whitelist` column. This restricts
-counting to real cells and is what makes the later join to the Seurat
+counting to real cells and is what makes a later join to Seurat or scanpy cell
 metadata lossless.
 
 ## Running it
