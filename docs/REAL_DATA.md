@@ -38,7 +38,7 @@ For each sample, **one** of:
 | You have | Sample sheet | `barcode_source` |
 | --- | --- | --- |
 | DRAGEN scRNA R2 FASTQ (barcode+UMI in the read name) | `input` = the R2 FASTQ | `read_name` (default) |
-| Raw 10x FASTQ pair | `input` = R2, `mate_fastq` = R1 | `paired_fastq` |
+| Raw 10x FASTQ pair | `input` = R2, `r1_fastq` = R1 | `paired_fastq` |
 | Cell Ranger `possorted_genome_bam.bam` | `input` = the BAM | `tags` |
 
 The old per-read `*_CBC.csv` files under

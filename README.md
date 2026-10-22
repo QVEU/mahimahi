@@ -70,10 +70,10 @@ such as a host mRNA, as a sense control (step c). Entry names become the
 
 **b. A sample sheet**, `config/samples.tsv`, one row per sample. For a
 standard 10x run you give the R2 (cDNA) FASTQ as `input` and the R1
-(barcode + UMI) FASTQ as `mate_fastq`:
+(barcode + UMI) FASTQ as `r1_fastq`:
 
 ```
-sample    input                              mate_fastq                         barcode_source
+sample    input                              r1_fastq                           barcode_source
 WT_rep1   /data/run1/WT_S1_R2_001.fastq.gz   /data/run1/WT_S1_R1_001.fastq.gz   paired_fastq
 ```
 
@@ -144,7 +144,7 @@ The `input` column also accepts files that already carry the barcode. Set
 
 | You have | `input` | `barcode_source` |
 | --- | --- | --- |
-| Raw 10x R1 + R2 FASTQs | R2 FASTQ, with R1 in `mate_fastq` | `paired_fastq` |
+| Raw 10x R1 + R2 FASTQs | R2 FASTQ, with R1 in `r1_fastq` | `paired_fastq` |
 | DRAGEN scRNA FASTQ (barcode+UMI in the read name) | the FASTQ | `read_name` |
 | Cell Ranger `possorted_genome_bam.bam` | the BAM | `tags` |
 
