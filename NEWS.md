@@ -1,5 +1,22 @@
 # Changes
 
+## Stricter ground-truth test, and a UMI_count fix (October 2026)
+
+The synthetic fixtures now draw every UMI from one shared pool, so the same
+UMI sequence appears on both strands, on several templates and in several
+cells. Each is a different molecule and must be counted. They also carry
+decoy reads that must be dropped (unmapped, a paralog pair that maps at
+MAPQ 0, secondary, supplementary, low MAPQ, missing barcode), and the test
+checks that each was dropped by the filter meant for it.
+
+That found one bug: `UMI_count` (per-cell total) counted distinct UMI
+strings, so two molecules sharing a UMI sequence on different templates or
+strands counted once. It now counts distinct (template, strand, UMI)
+molecules, and equals the cell's Pos + Neg summed over templates. `Pos`,
+`Neg` and `Rep_Index` were already correct and are unchanged. On real 12 nt
+UMIs such collisions are rare, so real `UMI_count` values move very little,
+but `filters.min_cell_umis` uses it.
+
 ## Narrowed to FASTQ → BAM → counts (October 2026)
 
 mahimahi now does one thing: turn sequenced FASTQs (or an aligned BAM) into a

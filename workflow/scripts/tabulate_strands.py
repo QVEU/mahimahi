@@ -112,9 +112,12 @@ def main(argv=None):
     # nunique but avoids materialising per-group hash sets.
     distinct = reads.drop_duplicates(subset=["CBC", "ref_name", "strand", "UMI"])
 
-    # Total distinct UMIs per cell, across templates and strands. This is the
-    # cell's viral UMI content.
-    umi_count = distinct.groupby("CBC", observed=True)["UMI"].nunique().rename("UMI_count")
+    # Total distinct molecules per cell, across templates and strands: the
+    # cell's viral UMI content, and so Pos + Neg summed over its templates.
+    # Each row of `distinct` is one (template, strand, UMI) molecule. Counting
+    # distinct UMI strings instead would merge different molecules that happen
+    # to share a UMI sequence on another template or strand.
+    umi_count = distinct.groupby("CBC", observed=True).size().rename("UMI_count")
 
     # The count that matters: distinct UMIs per cell, per template, per strand.
     long = (distinct

@@ -31,6 +31,11 @@ READ_LEN = 120
 
 TEMPLATES = ["eGFP", "mRuby3", "HostControl"]
 
+# Two references with IDENTICAL sequence. Reads drawn from them map equally
+# well to both, so minimap2 gives them MAPQ 0 and the min_mapq filter must
+# drop every one. No Paralog row may appear in the output.
+PARALOGS = ["ParalogA", "ParalogB"]
+
 # (cell, template, strand) -> number of DISTINCT UMIs
 #
 # CELL_A carries both reporters at different replication levels:
@@ -65,6 +70,32 @@ for _n in range(POPULATION_CELLS):
 # distinct UMIs, not reads.
 READS_PER_UMI = 3
 
+# Reads that must NOT be counted. Each carries a real cell barcode, so a
+# filter that leaks lets them through as extra counts or extra rows, which
+# the verifier catches. The expected per-sample dispositions are written to
+# expected.json and checked against each sample's extract_stats.json.
+#
+# FASTQ inputs (DRAGEN and raw 10x share one read set):
+DECOY_UNMAPPED = 30    # random sequence: no alignment to any reference
+DECOY_MULTIMAP = 20    # from the paralog pair: MAPQ 0
+DECOY_NO_BARCODE = 10  # barcode block too short (DRAGEN: name field;
+                       # raw 10x: R1, which embed_barcodes drops before alignment)
+# Tagged BAM input: one count per excluded FLAG/MAPQ/tag case.
+BAM_DECOYS_EACH = 10
+
+
+def umi_for(index):
+    """12 nt UMI from an integer, drawn from ONE pool shared by every cell,
+    template and strand.
+
+    The same UMI string therefore appears on both strands of a template, on
+    several templates in a cell, and in several cells. Those are different
+    molecules, and each must be counted. A pipeline that deduplicates on too
+    narrow a key (UMI alone, or CBC+UMI, or omitting strand) undercounts here,
+    and the exact comparison fails.
+    """
+    return "".join("ACGT"[(index >> (2 * i)) & 3] for i in range(UMI_LEN))[::-1]
+
 
 def gzip_text(path):
     """Open a .gz for text writing with a zeroed mtime.
@@ -97,6 +128,9 @@ def revcomp(s):
 def main():
     # --- template FASTA ------------------------------------------------
     refs = {name: random_seq(800) for name in TEMPLATES}
+    paralog_seq = random_seq(800)
+    for name in PARALOGS:
+        refs[name] = paralog_seq
     template_path = os.path.join(FIXTURES, "template.fa")
     with open(template_path, "w") as fh:
         for name, seq in refs.items():
@@ -114,7 +148,7 @@ def main():
         cbc = _cbc_for(cell)
         for strand, n_umis in strands.items():
             for u in range(n_umis):
-                umi = f"{template[:2].upper()}{strand[0]}{u:04d}".ljust(UMI_LEN, "T")[:UMI_LEN]
+                umi = umi_for(u)
                 start = random.randint(0, len(refs[template]) - READ_LEN)
                 fragment = refs[template][start:start + READ_LEN]
                 seq = revcomp(fragment) if strand == "Pos" else fragment
@@ -122,6 +156,28 @@ def main():
                     counter += 1
                     records.append((f"SIM:1:FLOWCELL:1:1101:{counter}:{counter}",
                                     cbc, umi, seq))
+
+    # Decoys. All use CELL_A's barcode and UMIs past any real one, so if one
+    # leaks it shows up as an extra count or an extra row.
+    decoy_cbc = _cbc_for("CELL_AAAAAAAAAAAAA")
+    decoy_umi = iter(range(100_000, 200_000))
+    for _ in range(DECOY_UNMAPPED):
+        counter += 1
+        records.append((f"SIM:1:FLOWCELL:1:1101:{counter}:{counter}",
+                        decoy_cbc, umi_for(next(decoy_umi)), random_seq(READ_LEN)))
+    for _ in range(DECOY_MULTIMAP):
+        counter += 1
+        start = random.randint(0, len(paralog_seq) - READ_LEN)
+        records.append((f"SIM:1:FLOWCELL:1:1101:{counter}:{counter}",
+                        decoy_cbc, umi_for(next(decoy_umi)),
+                        paralog_seq[start:start + READ_LEN]))
+    for _ in range(DECOY_NO_BARCODE):
+        counter += 1
+        start = random.randint(0, len(refs["eGFP"]) - READ_LEN)
+        # Truncated barcode block: 16 nt CBC but only 4 nt of UMI.
+        records.append((f"SIM:1:FLOWCELL:1:1101:{counter}:{counter}",
+                        decoy_cbc, umi_for(next(decoy_umi))[:4],
+                        refs["eGFP"][start:start + READ_LEN]))
     random.shuffle(records)
 
     qual = "I" * READ_LEN
@@ -135,7 +191,8 @@ def main():
     with gzip_text(os.path.join(FIXTURES, "raw10x_S2_R1_001.fastq.gz")) as r1, \
          gzip_text(os.path.join(FIXTURES, "raw10x_S2_R2_001.fastq.gz")) as r2:
         for rid, cbc, umi, seq in records:
-            bc_seq = cbc + umi + "T" * 10          # barcode + UMI + polyT tail
+            # barcode + UMI + polyT tail; a truncated UMI leaves R1 short.
+            bc_seq = cbc + umi + ("T" * 10 if len(umi) == UMI_LEN else "")
             r1.write(f"@{rid} 1:N:0:1\n{bc_seq}\n+\n{'I' * len(bc_seq)}\n")
             r2.write(f"@{rid} 2:N:0:1\n{seq}\n+\n{qual}\n")
 
@@ -151,7 +208,7 @@ def main():
             cbc = _cbc_for(cell)
             for strand, n_umis in strands.items():
                 for u in range(n_umis):
-                    umi = f"{template[:2].upper()}{strand[0]}{u:04d}".ljust(UMI_LEN, "T")[:UMI_LEN]
+                    umi = umi_for(u)
                     for r in range(READS_PER_UMI):
                         counter += 1
                         flag = 16 if strand == "Pos" else 0
@@ -162,6 +219,32 @@ def main():
                             f"SIM_T:{counter}\t{flag}\t{template}\t{pos}\t60\t"
                             f"{READ_LEN}M\t*\t0\t0\t{s}\t{qual}\t"
                             f"CB:Z:{cbc}-1\tUB:Z:{umi}\n")
+
+        # Records that must be excluded: (flag, mapq, tags) per case. Each is
+        # otherwise a perfectly good eGFP alignment in CELL_A.
+        decoy_cbc = _cbc_for("CELL_AAAAAAAAAAAAA")
+        bam_decoys = [
+            (4,    0,  True),    # unmapped
+            (256,  60, True),    # secondary
+            (2048, 60, True),    # supplementary
+            (0,    10, True),    # MAPQ below filters.min_mapq
+            (0,    60, False),   # no UB tag
+        ]
+        decoy_umi = iter(range(100_000, 200_000))
+        for flag, mapq, has_ub in bam_decoys:
+            for _ in range(BAM_DECOYS_EACH):
+                counter += 1
+                pos = random.randint(1, len(refs["eGFP"]) - READ_LEN)
+                s = refs["eGFP"][pos - 1:pos - 1 + READ_LEN]
+                tags = f"CB:Z:{decoy_cbc}-1"
+                if has_ub:
+                    tags += f"\tUB:Z:{umi_for(next(decoy_umi))}"
+                if flag & 4:
+                    fh.write(f"SIM_T:{counter}\t{flag}\t*\t0\t0\t*\t*\t0\t0\t"
+                             f"{s}\t{qual}\t{tags}\n")
+                else:
+                    fh.write(f"SIM_T:{counter}\t{flag}\teGFP\t{pos}\t{mapq}\t"
+                             f"{READ_LEN}M\t*\t0\t0\t{s}\t{qual}\t{tags}\n")
 
     # Convert to BAM and drop the SAM: 16 MB of text becomes a few hundred KB,
     # which is the difference between committable example data and not.
@@ -178,12 +261,33 @@ def main():
               "is available before committing.", file=sys.stderr)
 
     # --- ground truth ---------------------------------------------------
+    # Per-cell totals. UMI_count is distinct molecules, i.e. distinct
+    # (template, strand, UMI); the shared UMI pool makes that differ from the
+    # number of distinct UMI strings.
+    cell_umis = {}
+    for (cell, _template), strands in TRUTH.items():
+        cbc = _cbc_for(cell)
+        cell_umis[cbc] = cell_umis.get(cbc, 0) + sum(strands.values())
+
+    kept = READS_PER_UMI * sum(cell_umis.values())
+    dispositions = {
+        "dragen_S1": {"kept": kept, "unmapped": DECOY_UNMAPPED,
+                      "low_mapq": DECOY_MULTIMAP, "no_barcode": DECOY_NO_BARCODE},
+        "raw10x_S2": {"kept": kept, "unmapped": DECOY_UNMAPPED,
+                      "low_mapq": DECOY_MULTIMAP, "no_barcode": 0},
+        "tagged_S3": {"kept": kept, "unmapped": BAM_DECOYS_EACH,
+                      "secondary": BAM_DECOYS_EACH, "supplementary": BAM_DECOYS_EACH,
+                      "low_mapq": BAM_DECOYS_EACH, "no_barcode": BAM_DECOYS_EACH},
+    }
+
     expected = []
     for (cell, template), strands in TRUTH.items():
         cbc = _cbc_for(cell)
         pos, neg = strands.get("Pos", 0), strands.get("Neg", 0)
         expected.append({
             "CBC": cbc, "ref_name": template, "Pos": pos, "Neg": neg,
+            "UMI_count": cell_umis[cbc],
+            "CBC_readcount": READS_PER_UMI * cell_umis[cbc],
             "Rep_Index": (neg / (pos + neg)) if (pos + neg) else None,
             "Neg_PosRatio": neg / (pos + 1),
         })
@@ -192,11 +296,13 @@ def main():
                    "barcode_length": BARCODE_LEN, "umi_length": UMI_LEN,
                    "population_rates": POPULATION_RATES,
                    "population_cells": POPULATION_CELLS,
+                   "dispositions": dispositions,
                    "expected": expected}, fh, indent=2)
 
     print(f"fixtures in {FIXTURES}")
     print(f"  templates: {TEMPLATES}")
-    print(f"  {len(records):,} reads, {len(records)//READS_PER_UMI:,} distinct UMIs")
+    print(f"  {kept:,} countable reads, {kept // READS_PER_UMI:,} distinct molecules, "
+          f"plus {len(records) - kept:,} FASTQ decoys")
     print(f"  {len(expected)} (cell, template) combinations")
     print(f"  population: {POPULATION_CELLS} cells at "
           + ", ".join(f"{k} (-)/(+)={v}" for k, v in POPULATION_RATES.items()))
