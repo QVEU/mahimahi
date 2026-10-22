@@ -79,10 +79,10 @@ def _read_samples():
             raise WorkflowError(
                 f"{path}: sample '{sample}' is a FASTQ but barcode_source is 'tags'. "
                 f"Tags only exist in an aligned BAM; use 'read_name' or 'paired_fastq'.")
-        if _barcode_source(sample, sheet) == "paired_fastq" and not row.get("mate_fastq"):
+        if _barcode_source(sample, sheet) == "paired_fastq" and not row.get("r1_fastq"):
             raise WorkflowError(
                 f"{path}: sample '{sample}' uses barcode_source 'paired_fastq' but has "
-                f"no 'mate_fastq' column value (the R1 barcode read).")
+                f"no 'r1_fastq' column value (the R1 barcode read).")
     return sheet
 
 
@@ -192,7 +192,7 @@ rule all:
 rule embed_barcodes:
     """Move the CBC+UMI from R1 into the R2 read name so it survives alignment."""
     input:
-        r1=lambda w: sample_field(w.sample, "mate_fastq"),
+        r1=lambda w: sample_field(w.sample, "r1_fastq"),
         r2=lambda w: SAMPLES.loc[w.sample, "input"],
     output:
         temp(f"{RESULTS}/{{sample}}/barcoded_R2.fastq.gz"),

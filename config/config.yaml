@@ -21,7 +21,7 @@ barcode:
   #   read_name     - already embedded in the read name (DRAGEN scRNA output).
   #   tags          - CB/UB tags in an aligned BAM (Cell Ranger).
   #   paired_fastq  - first bases of R1; embedded into the R2 name first.
-  #                   Requires a 'mate_fastq' column in the sample sheet.
+  #                   Requires an 'r1_fastq' column in the sample sheet.
   # Overridable per sample with a 'barcode_source' column.
   source: "read_name"
 

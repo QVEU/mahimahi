@@ -6,7 +6,7 @@
 #            .sam / .bam / .cram     -> used as-is (already aligned)
 #
 # Optional columns:
-#   mate_fastq      R1 barcode read; required when barcode_source is paired_fastq
+#   r1_fastq        R1 (barcode + UMI) read; required when barcode_source is paired_fastq
 #   barcode_source  per-sample override of config barcode.source
 #   datalabel       genotype label shared across sequencing runs.
 #                   Defaults to the sample name with a trailing _S<n> removed,
@@ -16,7 +16,7 @@
 #
 # Mixed input types in one run are fine.
 #
-sample	input	mate_fastq	barcode_source	datalabel	whitelist
+sample	input	r1_fastq	barcode_source	datalabel	whitelist
 EXAMPLE_dragen_fastq	/path/to/EXAMPLE_S1_R2_001.fastq.gz			
 EXAMPLE_raw_10x	/path/to/raw_S2_R2_001.fastq.gz	/path/to/raw_S2_R1_001.fastq.gz	paired_fastq		
 EXAMPLE_cellranger_bam	/path/to/possorted_genome_bam.bam		tags		
