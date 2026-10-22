@@ -24,6 +24,22 @@ scanpy object, figures) is up to you; none of that lives here.
 
 ## 1. Install
 
+You need `git` and conda. If you don't have conda, install
+[Miniforge](https://github.com/conda-forge/miniforge#install), which comes
+set up for conda-forge.
+
+Get the code from GitHub:
+
+```bash
+git clone https://github.com/QVEU/mahimahi.git
+cd mahimahi
+```
+
+(Or `git clone git@github.com:QVEU/mahimahi.git` if you use SSH keys with
+GitHub. The repository is public, so no login is needed to clone it.)
+
+Then create the environment and check it works:
+
 ```bash
 conda env create -f workflow/envs/mahimahi.yaml
 conda activate mahimahi
@@ -33,6 +49,16 @@ bash tests/workflow/run_workflow_tests.sh     # checks the install on built-in e
 The last line should end with `# Workflow tests: all passed.` The environment
 is small (Python, Snakemake, pysam, pandas, minimap2, samtools) and solves on
 Linux, Intel Macs and Apple Silicon.
+
+To update later, pull the latest code and refresh the environment:
+
+```bash
+cd mahimahi
+git pull
+conda env update -f workflow/envs/mahimahi.yaml --prune
+```
+
+Run all the commands below from inside the `mahimahi` folder.
 
 ## 2. Go from FASTQs to a counts TSV
 
