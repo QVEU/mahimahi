@@ -94,6 +94,12 @@ Every sample-specific value lives in these two files. For several experiments
 with different references, make one config per experiment and pass it with
 `--configfile config/<experiment>.yaml`.
 
+`config/config.yaml` explains every setting in comments.
+`config/config.simple.yaml` has the same settings and defaults with no
+comments, if you'd rather start from a short file. To use it, edit it and run
+with `--configfile config/config.simple.yaml`, or copy it as the starting
+point for your own per-experiment configs.
+
 **d. Run it.**
 
 ```bash
