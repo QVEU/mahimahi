@@ -7,12 +7,36 @@
     "mRuby3": 0.2
   },
   "population_cells": 24,
+  "dispositions": {
+    "dragen_S1": {
+      "kept": 50295,
+      "unmapped": 30,
+      "low_mapq": 20,
+      "no_barcode": 10
+    },
+    "raw10x_S2": {
+      "kept": 50295,
+      "unmapped": 30,
+      "low_mapq": 20,
+      "no_barcode": 0
+    },
+    "tagged_S3": {
+      "kept": 50295,
+      "unmapped": 10,
+      "secondary": 10,
+      "supplementary": 10,
+      "low_mapq": 10,
+      "no_barcode": 10
+    }
+  },
   "expected": [
     {
       "CBC": "AAAAAAAAAAAAAAAA",
       "ref_name": "eGFP",
       "Pos": 40,
       "Neg": 4,
+      "UMI_count": 89,
+      "CBC_readcount": 267,
       "Rep_Index": 0.09090909090909091,
       "Neg_PosRatio": 0.0975609756097561
     },
@@ -21,6 +45,8 @@
       "ref_name": "mRuby3",
       "Pos": 10,
       "Neg": 5,
+      "UMI_count": 89,
+      "CBC_readcount": 267,
       "Rep_Index": 0.3333333333333333,
       "Neg_PosRatio": 0.45454545454545453
     },
@@ -29,6 +55,8 @@
       "ref_name": "HostControl",
       "Pos": 30,
       "Neg": 0,
+      "UMI_count": 89,
+      "CBC_readcount": 267,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -37,6 +65,8 @@
       "ref_name": "eGFP",
       "Pos": 20,
       "Neg": 1,
+      "UMI_count": 46,
+      "CBC_readcount": 138,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.047619047619047616
     },
@@ -45,6 +75,8 @@
       "ref_name": "HostControl",
       "Pos": 25,
       "Neg": 0,
+      "UMI_count": 46,
+      "CBC_readcount": 138,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -53,6 +85,8 @@
       "ref_name": "mRuby3",
       "Pos": 8,
       "Neg": 2,
+      "UMI_count": 10,
+      "CBC_readcount": 30,
       "Rep_Index": 0.2,
       "Neg_PosRatio": 0.2222222222222222
     },
@@ -61,6 +95,8 @@
       "ref_name": "eGFP",
       "Pos": 60,
       "Neg": 3,
+      "UMI_count": 175,
+      "CBC_readcount": 525,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04918032786885246
     },
@@ -69,6 +105,8 @@
       "ref_name": "mRuby3",
       "Pos": 60,
       "Neg": 12,
+      "UMI_count": 175,
+      "CBC_readcount": 525,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19672131147540983
     },
@@ -77,6 +115,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 175,
+      "CBC_readcount": 525,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -85,6 +125,8 @@
       "ref_name": "eGFP",
       "Pos": 80,
       "Neg": 4,
+      "UMI_count": 220,
+      "CBC_readcount": 660,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04938271604938271
     },
@@ -93,6 +135,8 @@
       "ref_name": "mRuby3",
       "Pos": 80,
       "Neg": 16,
+      "UMI_count": 220,
+      "CBC_readcount": 660,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19753086419753085
     },
@@ -101,6 +145,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 220,
+      "CBC_readcount": 660,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -109,6 +155,8 @@
       "ref_name": "eGFP",
       "Pos": 100,
       "Neg": 5,
+      "UMI_count": 265,
+      "CBC_readcount": 795,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04950495049504951
     },
@@ -117,6 +165,8 @@
       "ref_name": "mRuby3",
       "Pos": 100,
       "Neg": 20,
+      "UMI_count": 265,
+      "CBC_readcount": 795,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19801980198019803
     },
@@ -125,6 +175,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 265,
+      "CBC_readcount": 795,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -133,6 +185,8 @@
       "ref_name": "eGFP",
       "Pos": 120,
       "Neg": 6,
+      "UMI_count": 310,
+      "CBC_readcount": 930,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.049586776859504134
     },
@@ -141,6 +195,8 @@
       "ref_name": "mRuby3",
       "Pos": 120,
       "Neg": 24,
+      "UMI_count": 310,
+      "CBC_readcount": 930,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19834710743801653
     },
@@ -149,6 +205,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 310,
+      "CBC_readcount": 930,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -157,6 +215,8 @@
       "ref_name": "eGFP",
       "Pos": 140,
       "Neg": 7,
+      "UMI_count": 355,
+      "CBC_readcount": 1065,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04964539007092199
     },
@@ -165,6 +225,8 @@
       "ref_name": "mRuby3",
       "Pos": 140,
       "Neg": 28,
+      "UMI_count": 355,
+      "CBC_readcount": 1065,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19858156028368795
     },
@@ -173,6 +235,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 355,
+      "CBC_readcount": 1065,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -181,6 +245,8 @@
       "ref_name": "eGFP",
       "Pos": 160,
       "Neg": 8,
+      "UMI_count": 400,
+      "CBC_readcount": 1200,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.049689440993788817
     },
@@ -189,6 +255,8 @@
       "ref_name": "mRuby3",
       "Pos": 160,
       "Neg": 32,
+      "UMI_count": 400,
+      "CBC_readcount": 1200,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19875776397515527
     },
@@ -197,6 +265,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 400,
+      "CBC_readcount": 1200,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -205,6 +275,8 @@
       "ref_name": "eGFP",
       "Pos": 180,
       "Neg": 9,
+      "UMI_count": 445,
+      "CBC_readcount": 1335,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.049723756906077346
     },
@@ -213,6 +285,8 @@
       "ref_name": "mRuby3",
       "Pos": 180,
       "Neg": 36,
+      "UMI_count": 445,
+      "CBC_readcount": 1335,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19889502762430938
     },
@@ -221,6 +295,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 445,
+      "CBC_readcount": 1335,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -229,6 +305,8 @@
       "ref_name": "eGFP",
       "Pos": 200,
       "Neg": 10,
+      "UMI_count": 490,
+      "CBC_readcount": 1470,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04975124378109453
     },
@@ -237,6 +315,8 @@
       "ref_name": "mRuby3",
       "Pos": 200,
       "Neg": 40,
+      "UMI_count": 490,
+      "CBC_readcount": 1470,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19900497512437812
     },
@@ -245,6 +325,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 490,
+      "CBC_readcount": 1470,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -253,6 +335,8 @@
       "ref_name": "eGFP",
       "Pos": 220,
       "Neg": 11,
+      "UMI_count": 535,
+      "CBC_readcount": 1605,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.049773755656108594
     },
@@ -261,6 +345,8 @@
       "ref_name": "mRuby3",
       "Pos": 220,
       "Neg": 44,
+      "UMI_count": 535,
+      "CBC_readcount": 1605,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19909502262443438
     },
@@ -269,6 +355,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 535,
+      "CBC_readcount": 1605,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -277,6 +365,8 @@
       "ref_name": "eGFP",
       "Pos": 240,
       "Neg": 12,
+      "UMI_count": 580,
+      "CBC_readcount": 1740,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04979253112033195
     },
@@ -285,6 +375,8 @@
       "ref_name": "mRuby3",
       "Pos": 240,
       "Neg": 48,
+      "UMI_count": 580,
+      "CBC_readcount": 1740,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.1991701244813278
     },
@@ -293,6 +385,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 580,
+      "CBC_readcount": 1740,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -301,6 +395,8 @@
       "ref_name": "eGFP",
       "Pos": 260,
       "Neg": 13,
+      "UMI_count": 625,
+      "CBC_readcount": 1875,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04980842911877394
     },
@@ -309,6 +405,8 @@
       "ref_name": "mRuby3",
       "Pos": 260,
       "Neg": 52,
+      "UMI_count": 625,
+      "CBC_readcount": 1875,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19923371647509577
     },
@@ -317,6 +415,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 625,
+      "CBC_readcount": 1875,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -325,6 +425,8 @@
       "ref_name": "eGFP",
       "Pos": 280,
       "Neg": 14,
+      "UMI_count": 670,
+      "CBC_readcount": 2010,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.0498220640569395
     },
@@ -333,6 +435,8 @@
       "ref_name": "mRuby3",
       "Pos": 280,
       "Neg": 56,
+      "UMI_count": 670,
+      "CBC_readcount": 2010,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.199288256227758
     },
@@ -341,6 +445,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 670,
+      "CBC_readcount": 2010,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -349,6 +455,8 @@
       "ref_name": "eGFP",
       "Pos": 300,
       "Neg": 15,
+      "UMI_count": 715,
+      "CBC_readcount": 2145,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04983388704318937
     },
@@ -357,6 +465,8 @@
       "ref_name": "mRuby3",
       "Pos": 300,
       "Neg": 60,
+      "UMI_count": 715,
+      "CBC_readcount": 2145,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19933554817275748
     },
@@ -365,6 +475,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 715,
+      "CBC_readcount": 2145,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -373,6 +485,8 @@
       "ref_name": "eGFP",
       "Pos": 320,
       "Neg": 16,
+      "UMI_count": 760,
+      "CBC_readcount": 2280,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04984423676012461
     },
@@ -381,6 +495,8 @@
       "ref_name": "mRuby3",
       "Pos": 320,
       "Neg": 64,
+      "UMI_count": 760,
+      "CBC_readcount": 2280,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19937694704049844
     },
@@ -389,6 +505,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 760,
+      "CBC_readcount": 2280,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -397,6 +515,8 @@
       "ref_name": "eGFP",
       "Pos": 340,
       "Neg": 17,
+      "UMI_count": 805,
+      "CBC_readcount": 2415,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04985337243401759
     },
@@ -405,6 +525,8 @@
       "ref_name": "mRuby3",
       "Pos": 340,
       "Neg": 68,
+      "UMI_count": 805,
+      "CBC_readcount": 2415,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19941348973607037
     },
@@ -413,6 +535,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 805,
+      "CBC_readcount": 2415,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -421,6 +545,8 @@
       "ref_name": "eGFP",
       "Pos": 360,
       "Neg": 18,
+      "UMI_count": 850,
+      "CBC_readcount": 2550,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04986149584487535
     },
@@ -429,6 +555,8 @@
       "ref_name": "mRuby3",
       "Pos": 360,
       "Neg": 72,
+      "UMI_count": 850,
+      "CBC_readcount": 2550,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.1994459833795014
     },
@@ -437,6 +565,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 850,
+      "CBC_readcount": 2550,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -445,6 +575,8 @@
       "ref_name": "eGFP",
       "Pos": 380,
       "Neg": 19,
+      "UMI_count": 895,
+      "CBC_readcount": 2685,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.049868766404199474
     },
@@ -453,6 +585,8 @@
       "ref_name": "mRuby3",
       "Pos": 380,
       "Neg": 76,
+      "UMI_count": 895,
+      "CBC_readcount": 2685,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.1994750656167979
     },
@@ -461,6 +595,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 895,
+      "CBC_readcount": 2685,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -469,6 +605,8 @@
       "ref_name": "eGFP",
       "Pos": 400,
       "Neg": 20,
+      "UMI_count": 940,
+      "CBC_readcount": 2820,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04987531172069826
     },
@@ -477,6 +615,8 @@
       "ref_name": "mRuby3",
       "Pos": 400,
       "Neg": 80,
+      "UMI_count": 940,
+      "CBC_readcount": 2820,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19950124688279303
     },
@@ -485,6 +625,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 940,
+      "CBC_readcount": 2820,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -493,6 +635,8 @@
       "ref_name": "eGFP",
       "Pos": 420,
       "Neg": 21,
+      "UMI_count": 985,
+      "CBC_readcount": 2955,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.0498812351543943
     },
@@ -501,6 +645,8 @@
       "ref_name": "mRuby3",
       "Pos": 420,
       "Neg": 84,
+      "UMI_count": 985,
+      "CBC_readcount": 2955,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.1995249406175772
     },
@@ -509,6 +655,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 985,
+      "CBC_readcount": 2955,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -517,6 +665,8 @@
       "ref_name": "eGFP",
       "Pos": 440,
       "Neg": 22,
+      "UMI_count": 1030,
+      "CBC_readcount": 3090,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.049886621315192746
     },
@@ -525,6 +675,8 @@
       "ref_name": "mRuby3",
       "Pos": 440,
       "Neg": 88,
+      "UMI_count": 1030,
+      "CBC_readcount": 3090,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19954648526077098
     },
@@ -533,6 +685,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 1030,
+      "CBC_readcount": 3090,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -541,6 +695,8 @@
       "ref_name": "eGFP",
       "Pos": 460,
       "Neg": 23,
+      "UMI_count": 1075,
+      "CBC_readcount": 3225,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.049891540130151846
     },
@@ -549,6 +705,8 @@
       "ref_name": "mRuby3",
       "Pos": 460,
       "Neg": 92,
+      "UMI_count": 1075,
+      "CBC_readcount": 3225,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19956616052060738
     },
@@ -557,6 +715,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 1075,
+      "CBC_readcount": 3225,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -565,6 +725,8 @@
       "ref_name": "eGFP",
       "Pos": 480,
       "Neg": 24,
+      "UMI_count": 1120,
+      "CBC_readcount": 3360,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.0498960498960499
     },
@@ -573,6 +735,8 @@
       "ref_name": "mRuby3",
       "Pos": 480,
       "Neg": 96,
+      "UMI_count": 1120,
+      "CBC_readcount": 3360,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.1995841995841996
     },
@@ -581,6 +745,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 1120,
+      "CBC_readcount": 3360,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -589,6 +755,8 @@
       "ref_name": "eGFP",
       "Pos": 500,
       "Neg": 25,
+      "UMI_count": 1165,
+      "CBC_readcount": 3495,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.0499001996007984
     },
@@ -597,6 +765,8 @@
       "ref_name": "mRuby3",
       "Pos": 500,
       "Neg": 100,
+      "UMI_count": 1165,
+      "CBC_readcount": 3495,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.1996007984031936
     },
@@ -605,6 +775,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 1165,
+      "CBC_readcount": 3495,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     },
@@ -613,6 +785,8 @@
       "ref_name": "eGFP",
       "Pos": 520,
       "Neg": 26,
+      "UMI_count": 1210,
+      "CBC_readcount": 3630,
       "Rep_Index": 0.047619047619047616,
       "Neg_PosRatio": 0.04990403071017274
     },
@@ -621,6 +795,8 @@
       "ref_name": "mRuby3",
       "Pos": 520,
       "Neg": 104,
+      "UMI_count": 1210,
+      "CBC_readcount": 3630,
       "Rep_Index": 0.16666666666666666,
       "Neg_PosRatio": 0.19961612284069097
     },
@@ -629,6 +805,8 @@
       "ref_name": "HostControl",
       "Pos": 40,
       "Neg": 0,
+      "UMI_count": 1210,
+      "CBC_readcount": 3630,
       "Rep_Index": 0.0,
       "Neg_PosRatio": 0.0
     }

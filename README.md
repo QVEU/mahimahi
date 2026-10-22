@@ -161,8 +161,11 @@ bash tests/workflow/run_workflow_tests.sh
 
 Builds nothing and needs no data: the committed fixtures in
 `tests/workflow/fixtures/` are synthetic reads with known per-cell,
-per-template, per-strand UMI counts. The suite runs all three input types,
-checks every count against that truth, checks that an inverted strand
+per-template, per-strand UMI counts. UMI sequences are reused across cells,
+templates and strands, and decoy reads (unmapped, multimapping, secondary,
+supplementary, low MAPQ, missing barcode) are mixed in. The suite runs all
+three input types, checks every count and every filtered read against that
+truth, checks that an inverted strand
 convention is caught, and checks that a second run does nothing. CI runs it
 on Linux and macOS for every push.
 
