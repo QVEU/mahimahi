@@ -64,9 +64,10 @@ Run all the commands below from inside the `mahimahi` folder.
 
 **a. A reference FASTA.** One entry per thing you want counted separately:
 the viral genome, plus any reporters (`eGFP`, `mRuby3`, ...) that tell
-co-infecting templates apart. Add one sequence whose orientation you know,
-such as a host mRNA, as a sense control (step c). Entry names become the
-`ref_name` column, so name them as you want them in figures.
+co-infecting templates apart. Entry names become the
+`ref_name` column, so name them as you want them in figures. Optionally, add
+a stretch of a host mRNA (e.g. *GAPDH*) as a strandedness check: it is counted
+like any other entry and should come out almost entirely `Pos` (step e).
 
 **b. A sample sheet**, `config/samples.tsv`, one row per sample. For a
 standard 10x run you give the R2 (cDNA) FASTQ as `input` and the R1
@@ -87,7 +88,6 @@ refuses to run while they are there.
 | `template` | path to the FASTA from step a |
 | `barcode.barcode_length`, `barcode.umi_length` | your 10x kit: 16 + 12 for 3' v3/v3.1 and 5' v3; 16 + 10 for 3' v2 and 5' v1/v2 |
 | `strand.convention` | `reverse_is_positive` (default) |
-| `strand.sense_control` | the FASTA entry name of your sense control |
 | `outputs.keep_bam` | `true` to keep the aligned BAM (with index) |
 
 Every sample-specific value lives in these two files. For several experiments
@@ -111,10 +111,11 @@ On a cluster, the same command runs inside a single job (for example
 `sbatch --cpus-per-task=8 --wrap "snakemake --cores 8"`).
 
 **e. Check the strand call, then use the table.** Open
-`results/strand_qc_summary.tsv`: the sense control should be ≥ 90%
-positive-sense (the run fails if it is not, because that means the strand
-convention is inverted), and viral templates typically show `neg_over_pos`
-around 0.005–0.05.
+`results/strand_qc_summary.tsv`: viral templates should be mostly
+positive-sense, typically with `neg_over_pos` around 0.005–0.05, and a host
+mRNA entry, if you added one, nearly 100% positive-sense. Mostly
+negative-sense across the board means `strand.convention` is set the wrong
+way round.
 
 ## 3. The output
 
@@ -165,8 +166,7 @@ per-template, per-strand UMI counts. UMI sequences are reused across cells,
 templates and strands, and decoy reads (unmapped, multimapping, secondary,
 supplementary, low MAPQ, missing barcode) are mixed in. The suite runs all
 three input types, checks every count and every filtered read against that
-truth, checks that an inverted strand
-convention is caught, and checks that a second run does nothing. CI runs it
+truth, and checks that a second run does nothing. CI runs it
 on Linux and macOS for every push.
 
 [docs/REAL_DATA.md](docs/REAL_DATA.md) is the checklist for running on the

@@ -21,7 +21,6 @@ cell-analysis code was removed):
 - every per-cell, per-template `Pos`/`Neg`/`Rep_Index` value matches the
   synthetic truth for all three input routes (234 rows);
 - eGFP and mRuby3 in the same cell come out distinct (0.0909 vs 0.3333);
-- an inverted strand convention is rejected by the sense control;
 - a second run is a no-op, and a clean re-run gives a byte-identical
   decompressed `mahimahi_counts.tsv.gz`.
 
@@ -69,7 +68,9 @@ Confirm which of these are wanted and where each one's FASTQ or BAM lives.
 distinguish: the viral genome or replicon for each experiment (CVB3, EVA71,
 PV), plus `eGFP` / `mRuby3` (or whatever names the donor and acceptor carry)
 for the co-infection runs. Each entry name becomes a `ref_name` in the output,
-so name them as they should appear in figures.
+so name them as they should appear in figures. A stretch of a host mRNA
+(e.g. *ACTB* or *GAPDH*) can be added as an optional strandedness check; it
+should come out almost entirely `Pos`.
 
 The exact sequences used for the original runs are the ones to use. If the
 CVB3, EVA71 and PV experiments used different templates, they need separate
@@ -79,29 +80,20 @@ config files (one `template` per run), e.g. `config/cvb3.yaml`,
 For Cell Ranger BAM inputs the FASTA is unused; the `ref_name` values come
 from the BAM header (`PV`, `GFP`, `mRuby` in the lab's Cell Ranger reference).
 
-### 3. A sense control
-
-`strand.sense_control`: the name of one FASTA entry whose orientation is known
-and which the reads cover, such as a host transcript (e.g. a stretch of
-*ACTB* or *GAPDH* mRNA) or a reporter's coding sequence. Without it the
-workflow still runs but cannot check the strand convention, and an inverted
-convention swaps `Pos` and `Neg` everywhere while looking plausible. A
-viral-only FASTA has no such entry, so add one.
-
-### 4. Chemistry, per run
+### 3. Chemistry, per run
 
 10x 3' **v2** (`umi_length: 10`) or **v3 / v3.1** (`umi_length: 12`). This
 is the one setting most likely to have been wrong before; the run sheet or
 the Cell Ranger `web_summary.html` ("Chemistry") states it.
 
-### 5. DRAGEN read-name layout (DRAGEN inputs only)
+### 4. DRAGEN read-name layout (DRAGEN inputs only)
 
 Which colon-separated field of the read name holds `<CBC><UMI>`; the default
 is field 7. Copying the first read header of one R2 FASTQ is enough to check
 this. The workflow validates the layout against the first 1000 reads and
 stops with the offending read if it is wrong.
 
-### 6. Barcode whitelist (recommended)
+### 5. Barcode whitelist (recommended)
 
 Per sample, the called-cell list: Cell Ranger's
 `filtered_feature_bc_matrix/barcodes.tsv.gz` or DRAGEN's
@@ -120,7 +112,7 @@ snakemake --cores 8 --configfile config/<run>.yaml -n   # check the plan
 snakemake --cores 8 --configfile config/<run>.yaml
 ```
 
-Then check `results/<sample>/strand_qc.tsv` (sense control `pos_frac` >= 0.9;
-viral `neg_over_pos` roughly 0.005–0.05) and
+Then check `results/<sample>/strand_qc.tsv` (viral templates mostly
+`Pos`, `neg_over_pos` roughly 0.005–0.05) and
 `results/<sample>/extract_stats.json` (`kept` close to `total`) before using
 the counts.

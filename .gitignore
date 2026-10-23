@@ -4,7 +4,6 @@ results/
 tests/workflow/results*/
 # tests/workflow/fixtures/ is TRACKED: it is the committed example data.
 # Verify with: python3 tests/workflow/make_fixtures.py --check
-tests/workflow/config_inverted.yaml
 
 # Large sequencing files belong on the share, not in git
 *.bam

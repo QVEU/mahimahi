@@ -8,9 +8,7 @@
 #
 # Generates synthetic reads whose per-cell, per-template, per-strand UMI
 # counts are known exactly, runs the workflow over all three supported input
-# types, and checks the output against that truth. Also confirms that an
-# inverted strand convention is caught rather than silently producing
-# upside-down ratios.
+# types, and checks the output against that truth.
 
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
@@ -171,26 +169,7 @@ nbam=$(ls tests/workflow/results/*/aligned.bam 2>/dev/null | wc -l)
 (( nbam == 2 )) || { echo "  expected 2 kept BAMs (the FASTQ samples), found $nbam"; bam_fail=1; }
 [[ "$bam_fail" -eq 0 ]] && echo "kept BAMs OK" || { echo "FAILED: kept BAMs"; failures=$((failures+1)); }
 
-step "6. Confirm an inverted strand convention is rejected"
-sed -e 's/convention: "reverse_is_positive"/convention: "forward_is_positive"/' \
-    -e 's#results_dir: "tests/workflow/results"#results_dir: "tests/workflow/results_inv"#' \
-    "$CFG" > tests/workflow/config_inverted.yaml
-rm -rf tests/workflow/results_inv
-if snakemake --configfile tests/workflow/config_inverted.yaml --cores 4 >/dev/null 2>&1; then
-    echo "FAILED: inverted convention was accepted; the sense control should have caught it"
-    failures=$((failures+1))
-else
-    if grep -q "convention is probably inverted" \
-         tests/workflow/results_inv/*/logs/strand_qc.log 2>/dev/null; then
-        echo "inverted convention correctly rejected by the sense control"
-    else
-        echo "FAILED: run failed, but not via the strand_qc sense control"
-        failures=$((failures+1))
-    fi
-fi
-rm -rf tests/workflow/results_inv tests/workflow/config_inverted.yaml
-
-step "7. Idempotence: a second run should do nothing"
+step "6. Idempotence: a second run should do nothing"
 out=$(snakemake --configfile "$CFG" --cores 4 2>&1)
 if echo "$out" | grep -qE 'Nothing to be done|nothing to be done'; then
     echo "second run is a no-op, as expected"
