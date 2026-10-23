@@ -55,14 +55,6 @@ strand:
   # which is the expected (-)/(+) range for a picornavirus.
   convention: "reverse_is_positive"
 
-  # A sequence whose sense orientation is known -- a host transcript,
-  # spike-in, or reporter. rule strand_qc requires it to come out
-  # predominantly positive-sense, which catches an inverted convention before
-  # it reaches a figure. Leave empty to skip the assertion (the per-template
-  # balance is still reported).
-  sense_control: ""
-  sense_control_min_frac: 0.90
-
 filters:
   # minimap2 caps MAPQ at 60; >55 keeps effectively unique alignments only.
   # This is what mahimahi_dragen.py used.

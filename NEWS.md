@@ -1,5 +1,19 @@
 # Changes
 
+## Sense control check removed (October 2026)
+
+`strand.sense_control` and `strand.sense_control_min_frac` are gone, along
+with the `--sense-control` check in `strand_qc.py` that failed a run when a
+named reference came out less than 90% positive-sense. It was never part of
+the lab's original scripts and made checking the strand convention a separate
+setting with its own failure mode. `strand_qc` still reports
+the Pos/Neg balance per template and warns when a template is unusually
+negative-sense, so an inverted convention still shows up in the summary.
+Adding a host mRNA to the reference FASTA is still a good way to check
+strandedness: it is counted like any other template and should be almost
+entirely Pos. The README mentions it as an option.
+Configs that still set these keys keep working; the keys are ignored.
+
 ## Stricter ground-truth test, and a UMI_count fix (October 2026)
 
 The synthetic fixtures now draw every UMI from one shared pool, so the same

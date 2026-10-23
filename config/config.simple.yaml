@@ -11,8 +11,6 @@ barcode:
   ub_tag: "UB"
 strand:
   convention: "reverse_is_positive"
-  sense_control: ""
-  sense_control_min_frac: 0.90
 filters:
   min_mapq: 55
   min_cell_umis: 0

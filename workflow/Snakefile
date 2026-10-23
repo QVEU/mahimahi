@@ -141,8 +141,8 @@ def sample_field(sample, column, default=""):
 #
 # Every original script treated a reverse-mapped read (FLAG 0x10) as
 # positive-sense viral RNA. That is the default here. It is a property of the
-# library chemistry, not of the data, so it is configuration -- and
-# rule strand_qc can check it against a sequence of known orientation.
+# library chemistry, not of the data, so it is configuration. rule strand_qc
+# reports the resulting Pos/Neg balance per template.
 # ---------------------------------------------------------------------------
 
 _CONVENTIONS = {"reverse_is_positive": "--reverse-is-positive",
@@ -330,16 +330,13 @@ rule tabulate_strands:
 
 
 rule strand_qc:
-    """Strand balance per template; asserts the convention if a control is set."""
+    """Strand balance per template."""
     input:
         reads=f"{RESULTS}/{{sample}}/reads.tsv.gz",
     output:
         f"{RESULTS}/{{sample}}/strand_qc.tsv",
     params:
         script=os.path.join(SCRIPTS, "strand_qc.py"),
-        control=lambda w: (f"--sense-control {config['strand']['sense_control']}"
-                           if config["strand"].get("sense_control") else ""),
-        min_frac=config["strand"]["sense_control_min_frac"],
     log:
         f"{RESULTS}/{{sample}}/logs/strand_qc.log",
     conda:
@@ -347,7 +344,6 @@ rule strand_qc:
     shell:
         "python3 {params.script} {input.reads} "
         "-o {output} --sample {wildcards.sample} "
-        "{params.control} --sense-control-min-frac {params.min_frac} "
         "2> {log}"
 
 
